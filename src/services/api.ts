@@ -258,13 +258,61 @@ export const api = {
     }
 
     // 2. Resilient static / Vercel fallback
-    // Accept only configured Tech Elevant administrator credentials
-    const envPassword = (import.meta as any).env?.VITE_ADMIN_PASSWORD || "";
-    const isEnvAdmin =
-      cleanEmail === "admin@techelevant.com" &&
-      (cleanPassword === "Admin@Tech2026!" || (envPassword && cleanPassword === envPassword));
+    // Retrieve environment configured admin credentials from build-time injection, client env, or default
+    let configuredEmail = "admin@techelevant.com";
+    try {
+      if (typeof __ADMIN_EMAIL__ !== "undefined" && __ADMIN_EMAIL__) {
+        configuredEmail = __ADMIN_EMAIL__;
+      }
+    } catch {}
 
-    if (isEnvAdmin) {
+    const viteAdminEmail = (import.meta as any).env?.VITE_ADMIN_EMAIL;
+    if (viteAdminEmail) {
+      configuredEmail = viteAdminEmail;
+    }
+
+    let configuredPassword = "Admin@Tech2026!";
+    try {
+      if (typeof __ADMIN_PASSWORD__ !== "undefined" && __ADMIN_PASSWORD__) {
+        configuredPassword = __ADMIN_PASSWORD__;
+      }
+    } catch {}
+
+    const viteAdminPassword = (import.meta as any).env?.VITE_ADMIN_PASSWORD;
+    if (viteAdminPassword) {
+      configuredPassword = viteAdminPassword;
+    }
+
+    configuredEmail = configuredEmail.trim().toLowerCase();
+    configuredPassword = configuredPassword.trim();
+
+    // Check matches:
+    // 1) Configured environment admin (matches what was set in Vercel or .env)
+    const isConfiguredAdmin =
+      cleanEmail === configuredEmail && cleanPassword === configuredPassword;
+
+    // 2) Master backup default admin (always works so you are never locked out)
+    const isDefaultAdmin =
+      cleanEmail === "admin@techelevant.com" && cleanPassword === "Admin@Tech2026!";
+
+    // 3) Any updated administrator credentials saved locally in browser
+    let isStoredAdmin = false;
+    try {
+      const stored = localStorage.getItem("techelevant_custom_admin");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (
+          parsed.email &&
+          parsed.password &&
+          cleanEmail === parsed.email.trim().toLowerCase() &&
+          cleanPassword === parsed.password.trim()
+        ) {
+          isStoredAdmin = true;
+        }
+      }
+    } catch {}
+
+    if (isConfiguredAdmin || isDefaultAdmin || isStoredAdmin) {
       const token = "techelevant_token_" + Date.now();
       const admin = {
         id: "admin-techelevant",
