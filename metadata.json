@@ -1,0 +1,8 @@
+{
+  "name": "Tech Elevant",
+  "description": "Official enterprise software engineering and AI systems agency website and CMS management portal for Tech Elevant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

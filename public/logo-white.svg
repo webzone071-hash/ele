@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 84" fill="none">
+  <!-- TECH ELEVANT ICON EMBLEM (White / High Contrast Version) -->
+  <g id="te-emblem-white" transform="translate(6, 2)">
+    <!-- T Top Bar - Vibrant Blue Left Section with Slanted Joint -->
+    <path d="M 12 8 L 56 8 L 68 24 L 12 24 C 7.58 24 4 20.42 4 16 C 4 11.58 7.58 8 12 8 Z" fill="#3B82F6" />
+    
+    <!-- T Top Bar - Soft Slate Light Grey Right Section -->
+    <path d="M 60 8 L 94 8 C 98.42 8 102 11.58 102 16 C 102 20.42 98.42 24 94 24 L 72 24 Z" fill="#94A3B8" />
+    
+    <!-- T Vertical Stem - Vibrant Blue -->
+    <path d="M 24 24 L 38 24 L 38 70 C 38 72.2 36.2 74 34 74 L 28 74 C 25.8 74 24 72.2 24 70 Z" fill="#3B82F6" />
+
+    <!-- E Glyph - Middle Row Dot -->
+    <rect x="52" y="38" width="13" height="14" rx="6.5" fill="#94A3B8" />
+
+    <!-- E Glyph - Middle Row Bar -->
+    <rect x="71" y="38" width="31" height="14" rx="7" fill="#94A3B8" />
+
+    <!-- E Glyph - Bottom Row Bar -->
+    <rect x="52" y="60" width="50" height="14" rx="7" fill="#94A3B8" />
+  </g>
+
+  <!-- TYPOGRAPHY: TECH ELEVANT -->
+  <g transform="translate(132, 0)">
+    <text x="0" y="55" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="41" font-weight="900" letter-spacing="2" fill="#FFFFFF">TECH</text>
+    <text x="136" y="55" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="41" font-weight="800" letter-spacing="2" fill="#94A3B8">ELEVANT</text>
+  </g>
+</svg>

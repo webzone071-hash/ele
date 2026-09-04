@@ -1,0 +1,1318 @@
+{
+  "settings": {
+    "id": "site-settings-1",
+    "agencyName": "Tech Elevant",
+    "shortName": "Tech Elevant",
+    "tagline": "Enterprise Software Engineering & Digital Transformation",
+    "description": "Tech Elevant architects and engineers mission-critical web applications, enterprise SaaS platforms, AI systems, and cloud infrastructure for visionary global enterprises.",
+    "email": "contact@techelevant.com",
+    "phone": "+1 (415) 890-3420",
+    "whatsapp": "+14158903420",
+    "address": "750 Montgomery St, Suite 400, San Francisco, CA 94111, United States",
+    "officeHours": "Mon - Fri: 9:00 AM - 6:00 PM EST (24/7 Enterprise Support)",
+    "logoUrl": "/logo.svg",
+    "darkLogoUrl": "/logo-white.svg",
+    "faviconUrl": "/favicon.svg",
+    "brandColor": "#0A1C6A",
+    "secondaryColor": "#687483",
+    "seoTitle": "Tech Elevant | Enterprise Software & AI Engineering Agency",
+    "seoDescription": "Award-winning software engineering agency delivering bespoke web apps, enterprise SaaS, AI systems, and cloud architecture for US, UK, UAE & European clients.",
+    "seoKeywords": "Tech Elevant, software development agency, web development, custom software, AI agents, SaaS engineering, mobile app development, international software company",
+    "footerText": "Tech Elevant is an international software development powerhouse engineering bespoke digital ecosystems and scalable software products for ambitious global brands.",
+    "copyrightText": "© 2026 Tech Elevant. All Rights Reserved.",
+    "updatedAt": "2026-09-04T10:00:00.000Z",
+    "logoText": "TE",
+    "logoType": "both",
+    "metaTitle": "Tech Elevant | Enterprise Software & AI Engineering Agency"
+  },
+  "hero": {
+    "id": "hero-settings-1",
+    "badgeText": "Accepting Q3 / Q4 Enterprise Projects",
+    "heading": "Building Digital Products That Move",
+    "highlightedHeading": "Global Businesses Forward.",
+    "description": "We design, architect, and engineer high-performance web applications, enterprise AI systems, and scalable mobile products for visionary companies across USA, UK, UAE, and Europe.",
+    "primaryCtaText": "Start Your Project",
+    "primaryCtaUrl": "/get-in-touch",
+    "secondaryCtaText": "View Our Work",
+    "secondaryCtaUrl": "/portfolio",
+    "heroImageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80",
+    "stats": [
+      {
+        "label": "Delivered Projects",
+        "value": "140+"
+      },
+      {
+        "label": "Global Enterprise Clients",
+        "value": "65+"
+      },
+      {
+        "label": "Countries Served",
+        "value": "18+"
+      },
+      {
+        "label": "Client Satisfaction",
+        "value": "99.4%"
+      }
+    ],
+    "clientAvatars": [
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80"
+    ]
+  },
+  "navigation": [
+    {
+      "id": "nav-1",
+      "name": "Home",
+      "url": "/",
+      "displayOrder": 1,
+      "isActive": true,
+      "openInNewTab": false
+    },
+    {
+      "id": "nav-2",
+      "name": "About Us",
+      "url": "/about",
+      "displayOrder": 2,
+      "isActive": true,
+      "openInNewTab": false
+    },
+    {
+      "id": "nav-3",
+      "name": "Services",
+      "url": "/services",
+      "displayOrder": 3,
+      "isActive": true,
+      "openInNewTab": false
+    },
+    {
+      "id": "nav-4",
+      "name": "Portfolio",
+      "url": "/portfolio",
+      "displayOrder": 4,
+      "isActive": true,
+      "openInNewTab": false
+    },
+    {
+      "id": "nav-5",
+      "name": "Contact Us",
+      "url": "/contact",
+      "displayOrder": 5,
+      "isActive": true,
+      "openInNewTab": false
+    },
+    {
+      "id": "nav-6",
+      "name": "GET IN TOUCH",
+      "url": "/get-in-touch",
+      "displayOrder": 6,
+      "isActive": true,
+      "openInNewTab": false
+    }
+  ],
+  "socialLinks": [
+    {
+      "id": "soc-1",
+      "platform": "LinkedIn",
+      "url": "https://linkedin.com/company/apexcore-labs",
+      "icon": "Linkedin",
+      "isActive": true,
+      "displayOrder": 1
+    },
+    {
+      "id": "soc-2",
+      "platform": "GitHub",
+      "url": "https://github.com/apexcore-labs",
+      "icon": "Github",
+      "isActive": true,
+      "displayOrder": 2
+    },
+    {
+      "id": "soc-3",
+      "platform": "X / Twitter",
+      "url": "https://x.com/techelevant",
+      "icon": "Twitter",
+      "isActive": true,
+      "displayOrder": 3
+    },
+    {
+      "id": "soc-4",
+      "platform": "Fiverr",
+      "url": "https://www.fiverr.com",
+      "icon": "ExternalLink",
+      "isActive": true,
+      "displayOrder": 4
+    },
+    {
+      "id": "soc-5",
+      "platform": "Instagram",
+      "url": "https://instagram.com/techelevant",
+      "icon": "Instagram",
+      "isActive": true,
+      "displayOrder": 5
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec-1",
+      "sectionKey": "hero",
+      "title": "Hero Section",
+      "subtitle": "Primary conversion heading & visual showcase",
+      "isActive": true,
+      "displayOrder": 1
+    },
+    {
+      "id": "sec-2",
+      "sectionKey": "trust",
+      "title": "Trust & Client Logos",
+      "subtitle": "International client proof & partner badges",
+      "isActive": true,
+      "displayOrder": 2
+    },
+    {
+      "id": "sec-3",
+      "sectionKey": "about_preview",
+      "title": "About Agency Preview",
+      "subtitle": "Core mission statement & performance stats",
+      "isActive": true,
+      "displayOrder": 3
+    },
+    {
+      "id": "sec-4",
+      "sectionKey": "services",
+      "title": "Core Services",
+      "subtitle": "Engineering, Design & AI service offerings",
+      "isActive": true,
+      "displayOrder": 4
+    },
+    {
+      "id": "sec-5",
+      "sectionKey": "why_us",
+      "title": "Why Choose Us",
+      "subtitle": "Engineering rigor, speed and high reliability",
+      "isActive": true,
+      "displayOrder": 5
+    },
+    {
+      "id": "sec-6",
+      "sectionKey": "portfolio",
+      "title": "Selected Case Studies",
+      "subtitle": "Featured enterprise portfolio works",
+      "isActive": true,
+      "displayOrder": 6
+    },
+    {
+      "id": "sec-7",
+      "sectionKey": "fiverr",
+      "title": "Ready-to-Start / Fiverr Gigs",
+      "subtitle": "Direct-to-order marketplace services",
+      "isActive": true,
+      "displayOrder": 7
+    },
+    {
+      "id": "sec-8",
+      "sectionKey": "process",
+      "title": "7-Step Development Journey",
+      "subtitle": "Discovery to 24/7 production maintenance",
+      "isActive": true,
+      "displayOrder": 8
+    },
+    {
+      "id": "sec-9",
+      "sectionKey": "testimonials",
+      "title": "Client Testimonials",
+      "subtitle": "Verified feedback from US, UK & UAE founders",
+      "isActive": true,
+      "displayOrder": 9
+    },
+    {
+      "id": "sec-10",
+      "sectionKey": "cta",
+      "title": "Action Banner",
+      "subtitle": "Strategic conversion push before footer",
+      "isActive": true,
+      "displayOrder": 10
+    }
+  ],
+  "services": [
+    {
+      "id": "srv-1",
+      "name": "Web Application Development",
+      "slug": "web-development",
+      "icon": "Code2",
+      "shortDescription": "Custom responsive web apps, high-throughput portals, and high-converting enterprise frontends.",
+      "fullDescription": "We engineer resilient, high-speed web platforms utilizing modern micro-frontend and server-driven architectures. From bespoke SaaS dashboards to mission-critical portals, our applications achieve sub-second load times and flawless accessibility across all devices.",
+      "features": [
+        "Full-Stack Next.js & React Architecture",
+        "Serverless & Edge API Integration",
+        "Enterprise Performance & Lighthouse Optimization",
+        "WCAG 2.1 AA Compliance",
+        "Automated CI/CD Deployment Pipelines"
+      ],
+      "technologies": [
+        "React",
+        "Next.js",
+        "TypeScript",
+        "Tailwind CSS",
+        "Node.js",
+        "PostgreSQL"
+      ],
+      "benefits": [
+        "Zero technical debt with strict typed standards",
+        "High conversion rates through frictionless UX",
+        "Global low-latency CDN delivery"
+      ],
+      "process": [
+        "Architecture Blueprint",
+        "Design System Implementation",
+        "Iterative Sprint Builds",
+        "Rigorous Performance Audits"
+      ],
+      "ctaText": "Discuss Web Project",
+      "ctaUrl": "/get-in-touch?service=web-development",
+      "displayOrder": 1,
+      "isActive": true,
+      "isFeatured": true
+    },
+    {
+      "id": "srv-2",
+      "name": "Mobile App Engineering",
+      "slug": "mobile-app-development",
+      "icon": "Smartphone",
+      "shortDescription": "Cross-platform and native iOS & Android applications with buttery 60fps animations.",
+      "fullDescription": "We build intuitive, engaging mobile experiences that achieve top app store ratings. Our mobile engineering team specializes in seamless offline data synchronization, hardware integrations, push telemetry, and biometric authentication.",
+      "features": [
+        "React Native & Native Swift / Kotlin",
+        "Offline-First Sync Engine",
+        "Biometric Auth & Secure Keychain",
+        "Push Notifications & Real-Time Sync",
+        "Automated App Store Release Support"
+      ],
+      "technologies": [
+        "React Native",
+        "Swift",
+        "Kotlin",
+        "Expo",
+        "GraphQL",
+        "Firebase"
+      ],
+      "benefits": [
+        "Single codebase efficiency with native-grade performance",
+        "Over-the-air hot updates",
+        "Rapid time to market across App Store and Google Play"
+      ],
+      "process": [
+        "Platform Wireframing",
+        "Device Hardware Integration",
+        "Beta TestFlight Distribution",
+        "Store Submission Management"
+      ],
+      "ctaText": "Build Mobile App",
+      "ctaUrl": "/get-in-touch?service=mobile-app-development",
+      "displayOrder": 2,
+      "isActive": true,
+      "isFeatured": true
+    },
+    {
+      "id": "srv-3",
+      "name": "AI Solutions & Intelligent Agents",
+      "slug": "ai-development",
+      "icon": "Cpu",
+      "shortDescription": "Autonomous AI agents, custom LLM fine-tuning, RAG pipelines, and enterprise automation.",
+      "fullDescription": "Accelerate your operational efficiency with intelligent AI solutions. We construct specialized autonomous multi-agent workflows, semantic vector search engines, automated customer support agents, and private retrieval-augmented generation systems.",
+      "features": [
+        "Agentic Autonomous Task Orchestration",
+        "Retrieval-Augmented Generation (RAG)",
+        "Custom Vector Database Indexing",
+        "Fine-Tuned LLM Pipelines",
+        "Enterprise Data Privacy & Security Hardening"
+      ],
+      "technologies": [
+        "Gemini 2.5/3",
+        "LangChain",
+        "LlamaIndex",
+        "Pinecone",
+        "Python",
+        "FastAPI"
+      ],
+      "benefits": [
+        "Eliminate repetitive operational overhead by 70%",
+        "Secure private knowledge retrieval",
+        "Scalable autonomous execution"
+      ],
+      "process": [
+        "Data Audit & Feasibility",
+        "Prompt & Embedding Engineering",
+        "Prototype Evaluation",
+        "Production Edge Deployment"
+      ],
+      "ctaText": "Deploy AI Agents",
+      "ctaUrl": "/get-in-touch?service=ai-development",
+      "displayOrder": 3,
+      "isActive": true,
+      "isFeatured": true
+    },
+    {
+      "id": "srv-4",
+      "name": "SaaS Product Engineering",
+      "slug": "saas-development",
+      "icon": "Layers",
+      "shortDescription": "Multi-tenant cloud SaaS platforms, billing subscriptions, and scalable database architectures.",
+      "fullDescription": "From seed stage validation to enterprise scale, we build end-to-end multi-tenant Software-as-a-Service platforms. We handle team access control (RBAC), Stripe/Paddle merchant integration, usage-based metering, and audit logging.",
+      "features": [
+        "Multi-Tenant Data Isolation",
+        "Tiered Stripe & Merchant of Record Billing",
+        "Role-Based Access Control (RBAC)",
+        "Real-time Telemetry & Admin Command Centers",
+        "SOC2 Readiness Architectural Standards"
+      ],
+      "technologies": [
+        "Next.js",
+        "Express",
+        "PostgreSQL",
+        "Redis",
+        "Stripe",
+        "Docker",
+        "AWS"
+      ],
+      "benefits": [
+        "Rapid monetization readiness",
+        "Infinite horizontal scaling",
+        "Zero-downtime database migrations"
+      ],
+      "process": [
+        "Domain Modeling",
+        "Billing Tier Structuring",
+        "Core Tenant Isolation Build",
+        "Stress & Load Testing"
+      ],
+      "ctaText": "Launch SaaS Product",
+      "ctaUrl": "/get-in-touch?service=saas-development",
+      "displayOrder": 4,
+      "isActive": true,
+      "isFeatured": true
+    },
+    {
+      "id": "srv-5",
+      "name": "UI/UX & Product Design",
+      "slug": "ui-ux-design",
+      "icon": "Palette",
+      "shortDescription": "Conversion-obsessed product interfaces, comprehensive Figma design systems, and rapid prototyping.",
+      "fullDescription": "Exceptional engineering requires immaculate design. Our product designers create world-class digital experiences that elevate brand prestige, reduce customer drop-off, and turn complex workflows into intuitive software flows.",
+      "features": [
+        "Bespoke Figma Component Systems",
+        "High-Fidelity Interactive Prototypes",
+        "Usability Testing & Heatmap Analysis",
+        "Micro-Interactions & Motion Design",
+        "Design-to-Code Precision Handoff"
+      ],
+      "technologies": [
+        "Figma",
+        "Framer",
+        "Motion",
+        "Tailwind CSS",
+        "Storybook"
+      ],
+      "benefits": [
+        "3x increase in user onboarding completion",
+        "Consistent brand identity across all touchpoints",
+        "Accelerated developer implementation"
+      ],
+      "process": [
+        "User Journey Mapping",
+        "Information Architecture",
+        "Visual Polish & Accessibility",
+        "Component Library Tokenization"
+      ],
+      "ctaText": "Request UI/UX Redesign",
+      "ctaUrl": "/get-in-touch?service=ui-ux-design",
+      "displayOrder": 5,
+      "isActive": true,
+      "isFeatured": true
+    },
+    {
+      "id": "srv-6",
+      "name": "Cloud, API & Backend Architecture",
+      "slug": "backend-cloud-development",
+      "icon": "Server",
+      "shortDescription": "Ultra-fast REST & GraphQL microservices, database optimization, and Kubernetes container systems.",
+      "fullDescription": "We design unbreakable, self-healing backend systems capable of processing millions of concurrent requests. Our engineers implement distributed caching, event-driven queues, resilient message brokers, and bank-grade data encryption.",
+      "features": [
+        "Distributed Event-Driven Microservices",
+        "PostgreSQL & NoSQL Database Optimization",
+        "Kafka & RabbitMQ Message Queues",
+        "Zero-Trust API Security & Rate Limiting",
+        "Automated Infrastructure as Code (Terraform)"
+      ],
+      "technologies": [
+        "Node.js",
+        "Go",
+        "Docker",
+        "Kubernetes",
+        "PostgreSQL",
+        "Redis",
+        "AWS / GCP"
+      ],
+      "benefits": [
+        "99.99% system uptime guarantee",
+        "Optimized cloud expenditure",
+        "Seamless third-party API orchestration"
+      ],
+      "process": [
+        "System Load Profiling",
+        "Schema Normalization",
+        "Security Audit",
+        "Containerized Deployment"
+      ],
+      "ctaText": "Upgrade Backend",
+      "ctaUrl": "/get-in-touch?service=backend-cloud-development",
+      "displayOrder": 6,
+      "isActive": true,
+      "isFeatured": false
+    }
+  ],
+  "portfolio": [
+    {
+      "id": "port-1",
+      "title": "AuraPay - Global FinTech & Merchant Gateway",
+      "slug": "aurapay-global-fintech",
+      "client": "AuraPay Financial Corp (London, UK)",
+      "category": "SaaS",
+      "shortDescription": "Next-generation cross-border payment gateway processing over $120M in monthly transactional volume.",
+      "challenge": "The client needed to consolidate 14 regional banking rails into a unified, high-speed API gateway while maintaining PCI-DSS Level 1 compliance and sub-200ms latency worldwide.",
+      "solution": "Architected a distributed microservices framework with edge routing, biometric tokenization, automated FX hedging, and a stunning real-time merchant analytics dashboard.",
+      "result": "Achieved 99.995% uptime during peak holiday bursts, reduced failed transaction rates by 38%, and scaled seamlessly to 250,000 active global merchants.",
+      "technologies": [
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "PostgreSQL",
+        "Redis",
+        "Docker",
+        "AWS"
+      ],
+      "coverImage": "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&auto=format&fit=crop&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1000&auto=format&fit=crop&q=80"
+      ],
+      "projectUrl": "https://example.com/aurapay",
+      "githubUrl": "https://github.com",
+      "metrics": [
+        {
+          "label": "Monthly Volume",
+          "value": "$120M+"
+        },
+        {
+          "label": "API Latency",
+          "value": "<160ms"
+        },
+        {
+          "label": "Fraud Reduction",
+          "value": "42%"
+        }
+      ],
+      "isFeatured": true,
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "port-2",
+      "title": "Synthetix AI - Enterprise Contract Intelligence",
+      "slug": "synthetix-ai-contract-intelligence",
+      "client": "Synthetix Legal Tech (New York, USA)",
+      "category": "AI",
+      "shortDescription": "Autonomous LLM-driven contract extraction and compliance verification platform for Fortune 500 legal teams.",
+      "challenge": "Legal analysts were spending an average of 18 hours manually auditing multi-hundred-page commercial agreements for risk indemnification and regulatory liabilities.",
+      "solution": "Engineered a custom multi-stage RAG engine with hybrid semantic and BM25 vector search, chunk-level confidence scoring, and interactive citation highlighting.",
+      "result": "Reduced contract review turnaround by 82% while boosting discrepancy detection accuracy to 99.1% across 45,000+ audited enterprise agreements.",
+      "technologies": [
+        "React",
+        "FastAPI",
+        "Python",
+        "Gemini",
+        "Pinecone",
+        "Tailwind CSS"
+      ],
+      "coverImage": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&auto=format&fit=crop&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&auto=format&fit=crop&q=80"
+      ],
+      "projectUrl": "https://example.com/synthetix",
+      "metrics": [
+        {
+          "label": "Review Speedup",
+          "value": "82%"
+        },
+        {
+          "label": "Audited Pages",
+          "value": "1.2M+"
+        },
+        {
+          "label": "Accuracy Rate",
+          "value": "99.1%"
+        }
+      ],
+      "isFeatured": true,
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "port-3",
+      "title": "OmniHealth - Telehealth & Remote Care iOS/Android",
+      "slug": "omnihealth-telemedicine-suite",
+      "client": "OmniHealth Global (Dubai, UAE)",
+      "category": "Mobile",
+      "shortDescription": "HIPAA-compliant telemedicine app connecting patients with top specialists across the GCC region.",
+      "challenge": "Existing video consultation software suffered from frequent network drops in low-bandwidth areas and cumbersome prescription workflow handoffs.",
+      "solution": "Built a custom WebRTC video pipeline with adaptive bitrate scaling, integrated electronic health records (EHR), and automated pharmacy dispatching.",
+      "result": "Onboarded 180,000 active patients in the first 6 months, maintained a 4.9-star rating on the App Store, and facilitated over 500,000 virtual consultations.",
+      "technologies": [
+        "React Native",
+        "WebRTC",
+        "TypeScript",
+        "Node.js",
+        "MongoDB",
+        "Tailwind CSS"
+      ],
+      "coverImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1000&auto=format&fit=crop&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1000&auto=format&fit=crop&q=80"
+      ],
+      "projectUrl": "https://example.com/omnihealth",
+      "metrics": [
+        {
+          "label": "App Store Rating",
+          "value": "4.9 / 5.0"
+        },
+        {
+          "label": "Active Patients",
+          "value": "180K+"
+        },
+        {
+          "label": "Consultations",
+          "value": "500K+"
+        }
+      ],
+      "isFeatured": true,
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": "port-4",
+      "title": "LuxeAtelier - Headless Luxury Commerce",
+      "slug": "luxeeatelier-headless-commerce",
+      "client": "LuxeAtelier Paris (Paris, France)",
+      "category": "E-commerce",
+      "shortDescription": "Ultra-fast headless commerce platform tailored for bespoke luxury apparel with 3D product previews.",
+      "challenge": "Monolithic e-commerce platform suffered from 6-second page load times and inability to deliver tailored multi-currency luxury styling experiences.",
+      "solution": "Implemented Next.js Edge rendering, headless Shopify storefront integration, interactive WebGL 3D garment visualization, and localized checkout flows.",
+      "result": "Lighthouse performance score jumped from 32 to 98. Mobile conversion rate increased by 64% with average order value rising 28%.",
+      "technologies": [
+        "Next.js",
+        "Shopify Storefront API",
+        "Tailwind CSS",
+        "Three.js",
+        "Vercel"
+      ],
+      "coverImage": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000&auto=format&fit=crop&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000&auto=format&fit=crop&q=80"
+      ],
+      "projectUrl": "https://example.com/luxeatelier",
+      "metrics": [
+        {
+          "label": "Mobile Conversion",
+          "value": "+64%"
+        },
+        {
+          "label": "Lighthouse Score",
+          "value": "98/100"
+        },
+        {
+          "label": "Avg Order Value",
+          "value": "+28%"
+        }
+      ],
+      "isFeatured": true,
+      "displayOrder": 4,
+      "isActive": true
+    }
+  ],
+  "fiverrServices": [
+    {
+      "id": "fvr-1",
+      "title": "Full-Stack Web App Development (React, Next.js, Node.js)",
+      "slug": "full-stack-web-app-fiverr",
+      "category": "Web Development",
+      "shortDescription": "I will architect and develop a modern, fast, production-ready full-stack web application with responsive UI and secure backend API.",
+      "startingPrice": 350,
+      "rating": 5,
+      "reviewsCount": 84,
+      "fiverrUrl": "https://www.fiverr.com/share/full-stack-web-app",
+      "thumbnail": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80",
+      "deliveryTimeDays": 7,
+      "features": [
+        "Complete Next.js / React Frontend",
+        "RESTful / GraphQL Express Backend",
+        "MongoDB / PostgreSQL Database",
+        "Mobile-Optimized Responsive Layout",
+        "Free Deployment & Documentation"
+      ],
+      "isFeatured": true,
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "fvr-2",
+      "title": "Custom AI Agent & Chatbot Integration (Gemini / OpenAI)",
+      "slug": "ai-agent-chatbot-integration",
+      "category": "AI Solutions",
+      "shortDescription": "I will build an intelligent AI chatbot or autonomous agent with custom knowledge retrieval, document parsing, and API tools.",
+      "startingPrice": 280,
+      "rating": 4.9,
+      "reviewsCount": 62,
+      "fiverrUrl": "https://www.fiverr.com/share/custom-ai-chatbot",
+      "thumbnail": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+      "deliveryTimeDays": 5,
+      "features": [
+        "Custom PDF / Document RAG Pipeline",
+        "Autonomous Tool / Function Calling",
+        "Modern Chat UI Widget",
+        "Enterprise Guardrails & Token Limits",
+        "Fast Cloud Deployment"
+      ],
+      "isFeatured": true,
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "fvr-3",
+      "title": "Cross-Platform Mobile App (React Native iOS & Android)",
+      "slug": "react-native-mobile-app",
+      "category": "Mobile Apps",
+      "shortDescription": "I will design and develop a high-performance cross-platform iOS and Android mobile app ready for App Store and Play Store.",
+      "startingPrice": 450,
+      "rating": 5,
+      "reviewsCount": 47,
+      "fiverrUrl": "https://www.fiverr.com/share/react-native-app",
+      "thumbnail": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&auto=format&fit=crop&q=80",
+      "deliveryTimeDays": 10,
+      "features": [
+        "Native Performance on iOS & Android",
+        "Push Notifications & Biometrics",
+        "Clean Redux / Zustand State Architecture",
+        "Backend & Firebase Integration",
+        "App Store Submission Assistance"
+      ],
+      "isFeatured": true,
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": "fvr-4",
+      "title": "Figma to Responsive Pixel-Perfect Next.js Frontend",
+      "slug": "figma-to-nextjs-code",
+      "category": "UI/UX & Frontend",
+      "shortDescription": "I will convert your Figma design into ultra-clean, pixel-perfect, accessible React / Next.js code with Tailwind CSS.",
+      "startingPrice": 190,
+      "rating": 5,
+      "reviewsCount": 118,
+      "fiverrUrl": "https://www.fiverr.com/share/figma-to-code",
+      "thumbnail": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&auto=format&fit=crop&q=80",
+      "deliveryTimeDays": 3,
+      "features": [
+        "100% Pixel-Perfect Match to Figma",
+        "Flawless Mobile, Tablet & Desktop Views",
+        "Tailwind CSS & Smooth Motion Animations",
+        "Zero Console Errors & SEO-Friendly",
+        "Tested on Real Devices"
+      ],
+      "isFeatured": true,
+      "displayOrder": 4,
+      "isActive": true
+    },
+    {
+      "id": "fvr-5",
+      "title": "Custom SaaS MVP Development in 14 Days",
+      "slug": "saas-mvp-development",
+      "category": "SaaS Development",
+      "shortDescription": "I will build your entire SaaS MVP with user authentication, Stripe subscription billing, dashboard, and database setup.",
+      "startingPrice": 650,
+      "rating": 4.9,
+      "reviewsCount": 39,
+      "fiverrUrl": "https://www.fiverr.com/share/saas-mvp-fast",
+      "thumbnail": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80",
+      "deliveryTimeDays": 14,
+      "features": [
+        "Stripe Recurring Subscription Engine",
+        "Magic Link / OAuth User Authentication",
+        "Admin Management Panel",
+        "PostgreSQL / MongoDB Integration",
+        "Modular Clean Codebase"
+      ],
+      "isFeatured": false,
+      "displayOrder": 5,
+      "isActive": true
+    },
+    {
+      "id": "fvr-6",
+      "title": "Bug Fixing, Performance & Speed Optimization",
+      "slug": "bug-fixing-speed-optimization",
+      "category": "Optimization",
+      "shortDescription": "I will debug, fix critical errors, optimize database queries, and achieve 90+ Google Lighthouse score for your website.",
+      "startingPrice": 120,
+      "rating": 5,
+      "reviewsCount": 95,
+      "fiverrUrl": "https://www.fiverr.com/share/fix-bugs-speed",
+      "thumbnail": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=80",
+      "deliveryTimeDays": 2,
+      "features": [
+        "Core Web Vitals 90+ Score Guarantee",
+        "Database Query Profiling & Indexing",
+        "Memory Leak & Crash Resolution",
+        "Edge Caching Configuration",
+        "Detailed Before / After Audit Report"
+      ],
+      "isFeatured": false,
+      "displayOrder": 6,
+      "isActive": true
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "clientName": "David Sterling",
+      "position": "Chief Technology Officer",
+      "company": "Veloce Mobility (Austin, TX, USA)",
+      "country": "United States",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "rating": 5,
+      "quote": "ApexCore Labs delivered our enterprise fleet management dashboard 3 weeks ahead of schedule. Their code quality, communication, and architectural foresight are on par with Tier-1 Silicon Valley engineering firms.",
+      "isFeatured": true,
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "test-2",
+      "clientName": "Elena Rostova",
+      "position": "VP of Product",
+      "company": "NordicFin Tech (Zurich, Switzerland)",
+      "country": "Switzerland",
+      "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "rating": 5,
+      "quote": "Working with ApexCore was the smoothest agency collaboration of my career. They took our complex financial algorithms and turned them into a gorgeous, intuitive Next.js application that our institutional clients love.",
+      "isFeatured": true,
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "test-3",
+      "clientName": "Tariq Al-Mansoor",
+      "position": "Managing Director",
+      "company": "Crestview Holdings (Dubai, UAE)",
+      "country": "United Arab Emirates",
+      "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "rating": 5,
+      "quote": "They designed and engineered our telehealth infrastructure handling millions of patient records across GCC countries. Flawless security, responsive support, and unmatched technical competence.",
+      "isFeatured": true,
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": "test-4",
+      "clientName": "Sophie Martin",
+      "position": "Founder & CEO",
+      "company": "LuxeAtelier (Paris, France)",
+      "country": "France",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "rating": 5,
+      "quote": "Our e-commerce conversion jumped by 64% in the first quarter post-launch. The team brings an artistic eye paired with uncompromising engineering standards. Highly recommended!",
+      "isFeatured": true,
+      "displayOrder": 4,
+      "isActive": true
+    }
+  ],
+  "team": [
+    {
+      "id": "team-1",
+      "name": "Marcus Vance",
+      "position": "Chief Executive & Lead Architect",
+      "bio": "Former Principal Architect at leading cloud platforms. Over 14 years architecting distributed systems and enterprise software.",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+      "linkedinUrl": "https://linkedin.com",
+      "githubUrl": "https://github.com",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "team-2",
+      "name": "Aria Montgomery",
+      "position": "Head of Product & UI/UX Design",
+      "bio": "Award-winning product designer who previously designed top fintech and health applications across Europe and North America.",
+      "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80",
+      "linkedinUrl": "https://linkedin.com",
+      "twitterUrl": "https://twitter.com",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "team-3",
+      "name": "Liam O'Connor",
+      "position": "Head of AI & Machine Learning",
+      "bio": "Specialist in autonomous agent orchestration, RAG architectures, and custom LLM deployment with sub-100ms inference.",
+      "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80",
+      "linkedinUrl": "https://linkedin.com",
+      "githubUrl": "https://github.com",
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": "team-4",
+      "name": "Zainab Al-Hashimi",
+      "position": "Principal Mobile Engineer",
+      "bio": "Expert React Native & iOS engineer having shipped 30+ top-ranking consumer apps with 10M+ combined downloads.",
+      "avatarUrl": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop&q=80",
+      "linkedinUrl": "https://linkedin.com",
+      "displayOrder": 4,
+      "isActive": true
+    }
+  ],
+  "faqs": [
+    {
+      "id": "faq-1",
+      "question": "How do you manage international clients across different time zones?",
+      "answer": "We structure our engineering sprints with overlapping hours across North American (EST/PST), European (GMT/CET), and Middle Eastern (GST) timezones. Every client is assigned a dedicated senior technical lead with real-time Slack/Teams access and weekly video sprint demos.",
+      "category": "General",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "faq-2",
+      "question": "What is your typical project timeline and delivery structure?",
+      "answer": "For MVP and focused applications, our timeline ranges from 3 to 6 weeks. For comprehensive enterprise systems, multi-month phased roadmaps are established with continuous bi-weekly staging deployments so you can test features as they are built.",
+      "category": "Process",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "faq-3",
+      "question": "Do I own 100% of the intellectual property and source code?",
+      "answer": "Yes, completely. Upon final milestone sign-off and payment, full intellectual property rights, repository ownership, deployment scripts, and documentation are transferred to your organization with zero licensing lock-in.",
+      "category": "Legal & IP",
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": "faq-4",
+      "question": "Can we order directly through Fiverr or marketplace contracts?",
+      "answer": "Yes! We maintain verified Pro marketplace accounts on Fiverr where you can initiate standardized gig orders with milestone escrow protection, instant reviews, and standardized deliverables. See our Marketplace page for ready-to-start services.",
+      "category": "Marketplace",
+      "displayOrder": 4,
+      "isActive": true
+    },
+    {
+      "id": "faq-5",
+      "question": "What post-launch maintenance and SLA support do you offer?",
+      "answer": "We provide tailored 24/7 SLA maintenance agreements covering cloud infrastructure monitoring, proactive security patches, bug fixes, database optimizations, and ongoing feature iterations.",
+      "category": "Support",
+      "displayOrder": 5,
+      "isActive": true
+    }
+  ],
+  "process": [
+    {
+      "id": "proc-1",
+      "stepNumber": 1,
+      "title": "Strategic Discovery & Architecture",
+      "description": "We deep-dive into your business KPIs, technical constraints, data schemas, and user personas to construct a deterministic product roadmap.",
+      "icon": "Compass",
+      "isActive": true,
+      "displayOrder": 1
+    },
+    {
+      "id": "proc-2",
+      "stepNumber": 2,
+      "title": "Technical Blueprint & Systems Design",
+      "description": "Detailed entity relationship diagrams (ERD), API contract definitions, latency targets, and cloud hosting topology setup.",
+      "icon": "FileCode",
+      "isActive": true,
+      "displayOrder": 2
+    },
+    {
+      "id": "proc-3",
+      "stepNumber": 3,
+      "title": "High-Fidelity UI/UX & Design Tokens",
+      "description": "Figma design systems, conversion-driven interactive prototypes, and atomic component libraries aligned with your brand prestige.",
+      "icon": "Palette",
+      "isActive": true,
+      "displayOrder": 3
+    },
+    {
+      "id": "proc-4",
+      "stepNumber": 4,
+      "title": "Sprint-Driven Full-Stack Engineering",
+      "description": "Production development using clean, strictly-typed TypeScript, modular component architecture, and automated unit testing.",
+      "icon": "Terminal",
+      "isActive": true,
+      "displayOrder": 4
+    },
+    {
+      "id": "proc-5",
+      "stepNumber": 5,
+      "title": "Automated QA & Security Hardening",
+      "description": "Comprehensive end-to-end stress testing, cross-browser audits, OWASP vulnerability scans, and Core Web Vitals optimization.",
+      "icon": "ShieldCheck",
+      "isActive": true,
+      "displayOrder": 5
+    },
+    {
+      "id": "proc-6",
+      "stepNumber": 6,
+      "title": "Zero-Downtime Global Production Launch",
+      "description": "Multi-region CDN deployment, DNS cutover, database migration verification, and real-time error telemetry monitoring.",
+      "icon": "Rocket",
+      "isActive": true,
+      "displayOrder": 6
+    },
+    {
+      "id": "proc-7",
+      "stepNumber": 7,
+      "title": "24/7 SLA Support & Growth Scaling",
+      "description": "Continuous infrastructure health monitoring, performance tuning, regular security patching, and ongoing feature expansion.",
+      "icon": "Headphones",
+      "isActive": true,
+      "displayOrder": 7
+    }
+  ],
+  "leads": [
+    {
+      "id": "consultation-1788435575424",
+      "type": "consultation",
+      "fullName": "sds",
+      "email": "asash@haiojd",
+      "company": "",
+      "phone": "",
+      "service": "UI/UX & Product Design",
+      "budget": "$50,000 - $100,000",
+      "timeline": "Within 3 - 6 Months",
+      "projectDetails": "ssd",
+      "status": "new",
+      "createdAt": "2026-09-03T11:39:35.424Z"
+    },
+    {
+      "id": "lead-1788435556694",
+      "type": "contact",
+      "fullName": "jhon",
+      "email": "jhon@qhmdol.com",
+      "company": "",
+      "phone": "",
+      "service": "Web Application Development",
+      "budget": "$25,000 - $50,000",
+      "projectDetails": "4000",
+      "status": "new",
+      "createdAt": "2026-09-03T11:39:16.694Z"
+    },
+    {
+      "id": "lead-1",
+      "type": "consultation",
+      "fullName": "Alexander Wright",
+      "email": "alexander.wright@techventures.co",
+      "company": "TechVentures Global (New York)",
+      "phone": "+1 212 555 0192",
+      "service": "SaaS Product Engineering",
+      "budget": "$50,000 - $100,000",
+      "timeline": "Within 2 months",
+      "projectDetails": "Looking to build a multi-tenant B2B compliance analytics dashboard for enterprise hedge funds. Need senior architects with deep experience in high-throughput data processing.",
+      "status": "in_progress",
+      "createdAt": "2026-09-01T10:05:28.006Z",
+      "notes": "Scheduled discovery call for Thursday 2 PM EST."
+    },
+    {
+      "id": "lead-2",
+      "type": "contact",
+      "fullName": "Amira Zahra",
+      "email": "amira@zahrainvest.ae",
+      "company": "Zahra Capital Partners (Dubai)",
+      "phone": "+971 4 432 9988",
+      "service": "AI Solutions & Intelligent Agents",
+      "budget": "$25,000 - $50,000",
+      "timeline": "Immediate",
+      "projectDetails": "We want an autonomous AI investment screening agent that ingests pitch decks, models financial metrics, and generates executive briefing memos.",
+      "status": "new",
+      "createdAt": "2026-09-02T10:05:28.006Z"
+    }
+  ],
+  "subscribers": [
+    {
+      "id": "sub-1",
+      "email": "techleads@enterprise.com",
+      "status": "subscribed",
+      "createdAt": "2026-08-29T10:05:28.006Z"
+    },
+    {
+      "id": "sub-2",
+      "email": "cto@innovations.io",
+      "status": "subscribed",
+      "createdAt": "2026-08-31T10:05:28.006Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "med-1",
+      "filename": "hero-dashboard-preview.jpg",
+      "originalName": "hero-dashboard-preview.jpg",
+      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&auto=format&fit=crop&q=80",
+      "mimeType": "image/jpeg",
+      "size": 420000,
+      "createdAt": "2026-09-03T10:05:28.006Z"
+    },
+    {
+      "id": "med-2",
+      "filename": "fintech-case-study.jpg",
+      "originalName": "fintech-case-study.jpg",
+      "url": "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&auto=format&fit=crop&q=80",
+      "mimeType": "image/jpeg",
+      "size": 380000,
+      "createdAt": "2026-09-03T10:05:28.006Z"
+    }
+  ],
+  "admins": [
+    {
+      "id": "admin-techelevant",
+      "email": "admin@techelevant.com",
+      "passwordHash": "$2b$12$X0ouvjxJQT..NYIlh2EebO5SFbil1rEIesRJqQuNuNuGprs.tXlzW",
+      "name": "Tech Elevant Administrator",
+      "role": "superadmin",
+      "createdAt": "2026-09-04T10:00:00.000Z"
+    }
+  ],
+  "visitors": [
+    {
+      "id": "vis-1788517242346-423",
+      "ip": "202.83.124.77",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "https://aistudio.google.com/",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-04T10:28:44.047Z",
+      "requestCount": 4,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1788509785544-791",
+      "ip": "202.83.124.79",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "https://aistudio.google.com/",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-04T08:16:25.549Z",
+      "requestCount": 2,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1788449553038-697",
+      "ip": "202.83.124.78",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "https://aistudio.google.com/",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T15:32:33.045Z",
+      "requestCount": 2,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1788449431563-768",
+      "ip": "202.83.124.79",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "https://aistudio.google.com/",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T15:30:31.567Z",
+      "requestCount": 2,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1788435166289-467",
+      "ip": "127.0.0.1",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "http://localhost:3000/admin",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T11:48:28.568Z",
+      "requestCount": 450,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1788430803358-488",
+      "ip": "127.0.0.5",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "Direct",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T10:20:03.842Z",
+      "requestCount": 5,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1788429931898-923",
+      "ip": "127.0.0.5",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "http://localhost:3000/",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T10:05:32.328Z",
+      "requestCount": 5,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1",
+      "ip": "198.51.100.42",
+      "country": "United States",
+      "countryCode": "US",
+      "city": "San Francisco",
+      "page": "/",
+      "referrer": "https://google.com",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T10:02:28.006Z",
+      "requestCount": 6,
+      "status": "normal"
+    },
+    {
+      "id": "vis-2",
+      "ip": "185.199.108.153",
+      "country": "United Kingdom",
+      "countryCode": "GB",
+      "city": "London",
+      "page": "/services",
+      "referrer": "https://linkedin.com",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/121.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-03T09:47:28.006Z",
+      "requestCount": 11,
+      "status": "normal"
+    },
+    {
+      "id": "vis-3",
+      "ip": "103.205.71.18",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/get-in-touch",
+      "referrer": "https://github.com",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+      "device": "Mobile",
+      "browser": "Safari",
+      "timestamp": "2026-09-03T09:30:28.006Z",
+      "requestCount": 4,
+      "status": "normal"
+    },
+    {
+      "id": "vis-4",
+      "ip": "194.233.164.88",
+      "country": "Germany",
+      "countryCode": "DE",
+      "city": "Frankfurt",
+      "page": "/portfolio",
+      "referrer": "Direct",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0",
+      "device": "Desktop",
+      "browser": "Firefox",
+      "timestamp": "2026-09-03T09:05:28.006Z",
+      "requestCount": 8,
+      "status": "normal"
+    },
+    {
+      "id": "vis-5",
+      "ip": "139.180.201.7",
+      "country": "Singapore",
+      "countryCode": "SG",
+      "city": "Singapore",
+      "page": "/marketplace-services",
+      "referrer": "https://fiverr.com",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 Version/17.2 Safari/605.1.15",
+      "device": "Desktop",
+      "browser": "Safari",
+      "timestamp": "2026-09-03T08:30:28.006Z",
+      "requestCount": 5,
+      "status": "normal"
+    },
+    {
+      "id": "vis-6",
+      "ip": "45.142.214.19",
+      "country": "Canada",
+      "countryCode": "CA",
+      "city": "Toronto",
+      "page": "/contact",
+      "referrer": "https://twitter.com",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+      "device": "Desktop",
+      "browser": "Edge",
+      "timestamp": "2026-09-03T07:45:28.006Z",
+      "requestCount": 7,
+      "status": "normal"
+    }
+  ],
+  "blockedIps": [],
+  "ddosEvents": [
+    {
+      "id": "ddos-1788430803844",
+      "ip": "127.0.0.5",
+      "timestamp": "2026-09-03T10:20:03.844Z",
+      "requestsCount": 20,
+      "windowMs": 10000,
+      "action": "Blocked for 1 Hour",
+      "details": "Client exceeded 20 requests in 10s window (Recorded: 20 reqs). Automated 1-hour quarantine engaged."
+    },
+    {
+      "id": "ddos-1788429932330",
+      "ip": "127.0.0.5",
+      "timestamp": "2026-09-03T10:05:32.330Z",
+      "requestsCount": 20,
+      "windowMs": 10000,
+      "action": "Blocked for 1 Hour",
+      "details": "Client exceeded 20 requests in 10s window (Recorded: 20 reqs). Automated 1-hour quarantine engaged."
+    },
+    {
+      "id": "ddos-seed-1",
+      "ip": "193.106.191.24",
+      "timestamp": "2026-09-03T09:45:28.006Z",
+      "requestsCount": 24,
+      "windowMs": 10000,
+      "action": "Blocked for 1 Hour",
+      "details": "Automated mitigation of high-frequency HTTP request burst (>20 req/10s)."
+    }
+  ]
+}

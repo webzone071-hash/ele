@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- TECH ELEVANT ICON (Transparent Background) -->
+  <g transform="translate(-2, 10)">
+    <!-- T Top Bar Left (Navy) with slanted joint -->
+    <path d="M 12 8 L 56 8 L 68 24 L 12 24 C 7.58 24 4 20.42 4 16 C 4 11.58 7.58 8 12 8 Z" fill="#001C7A" />
+    
+    <!-- T Top Bar Right (Slate Grey) -->
+    <path d="M 60 8 L 94 8 C 98.42 8 102 11.58 102 16 C 102 20.42 98.42 24 94 24 L 72 24 Z" fill="#5B6774" />
+    
+    <!-- T Vertical Stem -->
+    <path d="M 24 24 L 38 24 L 38 70 C 38 72.2 36.2 74 34 74 L 28 74 C 25.8 74 24 72.2 24 70 Z" fill="#001C7A" />
+
+    <!-- E Middle Dot -->
+    <rect x="52" y="38" width="13" height="14" rx="6.5" fill="#5B6774" />
+
+    <!-- E Middle Bar -->
+    <rect x="71" y="38" width="31" height="14" rx="7" fill="#5B6774" />
+
+    <!-- E Bottom Bar -->
+    <rect x="52" y="60" width="50" height="14" rx="7" fill="#5B6774" />
+  </g>
+</svg>
