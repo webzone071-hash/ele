@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { BootstrapData, SiteSettings, Service, Portfolio } from "../types";
+import { BootstrapData, SiteSettings, Service, Portfolio, Lead } from "../types";
 import { api } from "../services/api";
 import { initialData } from "../data/initialData";
 
@@ -12,6 +12,8 @@ interface ToastMessage {
 interface AppContextType {
   data: BootstrapData | null;
   settings: SiteSettings | null;
+  leads: Lead[];
+  refreshLeads: () => Promise<void>;
   currentPath: string;
   navigate: (path: string) => void;
   isLoading: boolean;
@@ -39,6 +41,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     return initialData;
   });
+
+  const [leads, setLeads] = useState<Lead[]>(() => {
+    try {
+      const raw = localStorage.getItem("techelevant_leads");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  });
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const resolveCurrentPath = () => {
     const hash = window.location.hash;
@@ -54,13 +70,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [activeServiceModal, setActiveServiceModal] = useState<Service | null>(null);
   const [activePortfolioModal, setActivePortfolioModal] = useState<Portfolio | null>(null);
 
+  const loadLeads = async () => {
+    try {
+      const leadsList = await api.getLeads();
+      setLeads(leadsList);
+      setData((prev) => (prev ? { ...prev, leads: leadsList } : prev));
+    } catch (err) {
+      console.log("Error loading leads in AppContext:", err);
+    }
+  };
+
   const loadData = async () => {
     try {
-      const bootstrap = await api.getBootstrapData();
+      const [bootstrap, leadsList] = await Promise.all([
+        api.getBootstrapData(),
+        api.getLeads().catch(() => []),
+      ]);
+
+      if (leadsList && leadsList.length >= 0) {
+        setLeads(leadsList);
+      }
+
       if (bootstrap && bootstrap.settings) {
-        setData(bootstrap);
+        const merged: BootstrapData = {
+          ...bootstrap,
+          leads: (leadsList && leadsList.length > 0) ? leadsList : (bootstrap.leads || []),
+        };
+        setData(merged);
         try {
-          localStorage.setItem("techelevant_site_data", JSON.stringify(bootstrap));
+          localStorage.setItem("techelevant_site_data", JSON.stringify(merged));
         } catch {
           // Ignore storage quota
         }
@@ -123,6 +161,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     loadData();
 
+    // Real-time synchronization for inbound leads across forms and tabs
+    const handleLeadsUpdated = () => {
+      loadLeads();
+    };
+    window.addEventListener("techelevant:leads_updated", handleLeadsUpdated);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "techelevant_leads") {
+        loadLeads();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
     // Listen to browser popstate (back/forward) & hashchange
     const handleLocationChange = () => {
       setCurrentPath(resolveCurrentPath());
@@ -130,6 +180,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     window.addEventListener("popstate", handleLocationChange);
     window.addEventListener("hashchange", handleLocationChange);
     return () => {
+      window.removeEventListener("techelevant:leads_updated", handleLeadsUpdated);
+      window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("popstate", handleLocationChange);
       window.removeEventListener("hashchange", handleLocationChange);
     };
@@ -156,8 +208,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider
       value={{
-        data,
+        data: data ? { ...data, leads } : null,
         settings: data?.settings || null,
+        leads,
+        refreshLeads: loadLeads,
         currentPath,
         navigate,
         isLoading,

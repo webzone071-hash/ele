@@ -34,11 +34,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   setActiveTab,
 }) => {
   const { user, logout } = useAuth();
-  const { navigate, refreshData, data, settings } = useApp();
+  const { navigate, refreshData, data, settings, leads: contextLeads } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const leads = data?.leads || [];
+  const leads = (contextLeads && contextLeads.length > 0) ? contextLeads : (data?.leads || []);
   const newLeadsCount = leads.filter((l) => l.status === "new").length;
 
   const navItems = [

@@ -21,10 +21,10 @@ interface OverviewProps {
 }
 
 export const AdminDashboardOverview: React.FC<OverviewProps> = ({ setActiveTab }) => {
-  const { data, refreshData, showToast } = useApp();
+  const { data, leads: contextLeads, refreshData, showToast } = useApp();
   const [isResetting, setIsResetting] = useState(false);
 
-  const leads = data?.leads || [];
+  const leads = (contextLeads && contextLeads.length > 0) ? contextLeads : (data?.leads || []);
   const services = data?.services || [];
   const portfolio = data?.portfolio || [];
   const fiverrServices = data?.fiverrServices || [];

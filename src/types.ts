@@ -293,4 +293,5 @@ export interface BootstrapData {
   team: TeamMember[];
   faqs: FAQ[];
   process: ProcessStep[];
+  leads?: Lead[];
 }

@@ -81,7 +81,7 @@ function getStoredLeads(): Lead[] {
     const raw = localStorage.getItem("techelevant_leads");
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
   return sampleInitialLeads;
@@ -148,30 +148,40 @@ export const api = {
   },
 
   async submitContact(leadData: Partial<Lead>): Promise<{ success: boolean; message: string }> {
-    await safeApiFetch(`${API_BASE}/public/contact`, {
+    const res = await safeApiFetch<any>(`${API_BASE}/public/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(leadData),
     });
 
-    // Always store lead locally to guarantee zero lost inquiries
+    // Always store lead locally to guarantee zero lost inquiries across all deployments
     const newLead: Lead = {
-      id: "lead-" + Date.now(),
+      id: res?.leadId || "lead-" + Date.now(),
       type: "contact",
       fullName: leadData.fullName || "Inquirer",
-      email: leadData.email || "",
-      company: leadData.company,
-      phone: leadData.phone,
-      service: leadData.service,
-      budget: leadData.budget,
-      timeline: leadData.timeline,
+      email: (leadData.email || "").trim(),
+      company: (leadData.company || "").trim(),
+      phone: (leadData.phone || "").trim(),
+      service: leadData.service || "Web Application Development",
+      budget: leadData.budget || "$25,000 - $50,000",
+      timeline: leadData.timeline || "Within 1 - 2 Months",
       projectDetails: leadData.projectDetails || "",
       status: "new",
       createdAt: new Date().toISOString(),
     };
+
     const leads = getStoredLeads();
     leads.unshift(newLead);
     saveStoredLeads(leads);
+
+    updateLocalSiteData((d) => {
+      if (!d.leads) d.leads = [];
+      d.leads.unshift(newLead);
+    });
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("techelevant:leads_updated", { detail: newLead }));
+    }
 
     return {
       success: true,
@@ -180,29 +190,39 @@ export const api = {
   },
 
   async submitConsultation(leadData: Partial<Lead>): Promise<{ success: boolean; message: string }> {
-    await safeApiFetch(`${API_BASE}/public/consultation`, {
+    const res = await safeApiFetch<any>(`${API_BASE}/public/consultation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(leadData),
     });
 
     const newLead: Lead = {
-      id: "lead-" + Date.now(),
+      id: res?.leadId || "lead-" + Date.now(),
       type: "consultation",
       fullName: leadData.fullName || "Consultation Request",
-      email: leadData.email || "",
-      company: leadData.company,
-      phone: leadData.phone,
-      service: leadData.service,
-      budget: leadData.budget,
-      timeline: leadData.timeline,
+      email: (leadData.email || "").trim(),
+      company: (leadData.company || "").trim(),
+      phone: (leadData.phone || "").trim(),
+      service: leadData.service || "AI Solutions & Intelligent Agents",
+      budget: leadData.budget || "$25,000 - $50,000",
+      timeline: leadData.timeline || "Within 1 - 2 Months",
       projectDetails: leadData.projectDetails || "",
       status: "new",
       createdAt: new Date().toISOString(),
     };
+
     const leads = getStoredLeads();
     leads.unshift(newLead);
     saveStoredLeads(leads);
+
+    updateLocalSiteData((d) => {
+      if (!d.leads) d.leads = [];
+      d.leads.unshift(newLead);
+    });
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("techelevant:leads_updated", { detail: newLead }));
+    }
 
     return {
       success: true,
@@ -787,15 +807,69 @@ export const api = {
   },
 
   // Leads
-  async getLeads(filters?: { status?: string; type?: string; search?: string }) {
+  async getLeads(filters?: { status?: string; type?: string; search?: string }): Promise<Lead[]> {
     const params = new URLSearchParams();
     if (filters?.status) params.append("status", filters.status);
     if (filters?.type) params.append("type", filters.type);
     if (filters?.search) params.append("search", filters.search);
 
     const stored = getStoredLeads();
-    return safeApiFetch(`${API_BASE}/admin/leads?${params.toString()}`, { headers: getAuthHeaders() }, stored);
+    const res = await safeApiFetch<any>(
+      `${API_BASE}/admin/leads?${params.toString()}`,
+      { headers: getAuthHeaders() },
+      { success: true, leads: stored }
+    );
+
+    let serverLeads: Lead[] = [];
+    if (res && Array.isArray(res.leads)) {
+      serverLeads = res.leads;
+    } else if (Array.isArray(res)) {
+      serverLeads = res;
+    } else {
+      serverLeads = stored;
+    }
+
+    // Merge and deduplicate stored leads with server leads
+    const leadMap = new Map<string, Lead>();
+    serverLeads.forEach((l) => {
+      if (l && l.id) leadMap.set(l.id, l);
+    });
+    stored.forEach((l) => {
+      if (l && l.id && !leadMap.has(l.id)) {
+        leadMap.set(l.id, l);
+      }
+    });
+
+    let combined = Array.from(leadMap.values()).sort(
+      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+
+    if (filters?.status && filters.status !== "all") {
+      combined = combined.filter((l) => l.status === filters.status);
+    }
+    if (filters?.type && filters.type !== "all") {
+      combined = combined.filter((l) => l.type === filters.type);
+    }
+    if (filters?.search) {
+      const q = filters.search.toLowerCase();
+      combined = combined.filter(
+        (l) =>
+          l.fullName.toLowerCase().includes(q) ||
+          l.email.toLowerCase().includes(q) ||
+          (l.company && l.company.toLowerCase().includes(q)) ||
+          (l.service && l.service.toLowerCase().includes(q)) ||
+          (l.projectDetails && l.projectDetails.toLowerCase().includes(q))
+      );
+    }
+
+    saveStoredLeads(Array.from(leadMap.values()));
+    updateLocalSiteData((d) => {
+      d.leads = Array.from(leadMap.values());
+    });
+
+    return combined;
   },
+
   async updateLead(id: string, updates: Partial<Lead>) {
     await safeApiFetch(`${API_BASE}/admin/leads/${id}`, {
       method: "PUT",
@@ -808,15 +882,32 @@ export const api = {
       leads[idx] = { ...leads[idx], ...updates };
       saveStoredLeads(leads);
     }
-    return { success: true, lead: leads[idx] };
+    updateLocalSiteData((d) => {
+      if (d.leads) {
+        const i = d.leads.findIndex((l) => l.id === id);
+        if (i >= 0) d.leads[i] = { ...d.leads[i], ...updates };
+      }
+    });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("techelevant:leads_updated"));
+    }
+    return { success: true, lead: idx >= 0 ? leads[idx] : undefined };
   },
+
   async updateLeadStatus(id: string, status: Lead["status"]) {
     return this.updateLead(id, { status });
   },
+
   async deleteLead(id: string) {
     await safeApiFetch(`${API_BASE}/admin/leads/${id}`, { method: "DELETE", headers: getAuthHeaders() });
     const leads = getStoredLeads().filter((l) => l.id !== id);
     saveStoredLeads(leads);
+    updateLocalSiteData((d) => {
+      if (d.leads) d.leads = d.leads.filter((l) => l.id !== id);
+    });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("techelevant:leads_updated"));
+    }
     return { success: true };
   },
 
