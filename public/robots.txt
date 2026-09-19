@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://techelevant.com/sitemap.xml
