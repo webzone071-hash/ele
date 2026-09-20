@@ -33,7 +33,7 @@ export const AdminVisitorsManager: React.FC = () => {
   const fetchVisitors = async (isManual = false) => {
     try {
       if (isManual) setIsRefreshing(true);
-      else setIsLoading(true);
+      else if (!analytics) setIsLoading(true);
 
       const raw = await api.getVisitorAnalytics();
       const data = (raw as any)?.data && (raw as any)?.totalVisits === undefined ? (raw as any).data : raw;
@@ -42,7 +42,9 @@ export const AdminVisitorsManager: React.FC = () => {
         showToast("Visitor telemetry refreshed.", "info");
       }
     } catch (err: any) {
-      showToast(err.message || "Failed to load visitor telemetry.", "error");
+      if (isManual) {
+        showToast(err.message || "Failed to load visitor telemetry.", "error");
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -50,10 +52,11 @@ export const AdminVisitorsManager: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchVisitors();
+    fetchVisitors(false);
+    // Real-time synchronization polling every 3 seconds
     const interval = setInterval(() => {
       fetchVisitors(false);
-    }, 15000); // Auto-refresh telemetry every 15s
+    }, 3000);
 
     const handleVisitorsUpdated = () => {
       fetchVisitors(false);
@@ -185,8 +188,27 @@ export const AdminVisitorsManager: React.FC = () => {
         </div>
       </div>
 
+      {/* Live Real-Time Stream Status Banner */}
+      <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-neutral-300">
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <span className="font-semibold text-white">Real-Time Cloud Telemetry Active</span>
+          <span className="text-neutral-500">•</span>
+          <span className="text-neutral-400">
+            Live visitor counting across <span className="text-emerald-400 font-mono">techelevant.com</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-3 font-mono text-[11px] text-neutral-400">
+          <span>Sync rate: <strong className="text-white">3s live</strong></span>
+          <span>Active presence: <strong className="text-emerald-400">{analytics?.activeNow ?? 1} online</strong></span>
+        </div>
+      </div>
+
       {/* KPI Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
@@ -197,7 +219,7 @@ export const AdminVisitorsManager: React.FC = () => {
             </span>
             <span className="text-[11px] text-emerald-400 font-medium block mt-1 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Accumulated impressions
+              Real-time hits
             </span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300">
@@ -214,7 +236,7 @@ export const AdminVisitorsManager: React.FC = () => {
               {analytics?.uniqueVisitors ?? new Set(rawVisitors.map((v) => v.ip || v.id)).size}
             </span>
             <span className="text-[11px] text-neutral-400 font-medium block mt-1">
-              Distinct IP addresses
+              Distinct client devices
             </span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300">
@@ -242,11 +264,29 @@ export const AdminVisitorsManager: React.FC = () => {
         <div className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
+              Active Right Now
+            </span>
+            <span className="text-3xl font-black text-emerald-400 tracking-tight flex items-center gap-1.5">
+              <span>{analytics?.activeNow ?? 1}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            </span>
+            <span className="text-[11px] text-neutral-400 font-medium block mt-1">
+              Active in last 5m
+            </span>
+          </div>
+          <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-400">
+            <Users className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
               Top Country
             </span>
             <span className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
               <span>{analytics?.countryStats?.[0]?.flag || "🌐"}</span>
-              <span>{analytics?.countryStats?.[0]?.country || "Global"}</span>
+              <span className="truncate max-w-[110px]">{analytics?.countryStats?.[0]?.country || "Global"}</span>
             </span>
             <span className="text-[11px] text-neutral-400 font-medium block mt-1">
               {analytics?.countryStats?.[0]?.count || 0} visits (

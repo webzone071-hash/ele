@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useApp } from "../../context/AppContext";
 import {
   Inbox,
@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { api } from "../../services/api";
 
@@ -23,6 +24,13 @@ interface OverviewProps {
 export const AdminDashboardOverview: React.FC<OverviewProps> = ({ setActiveTab }) => {
   const { data, leads: contextLeads, refreshData, showToast } = useApp();
   const [isResetting, setIsResetting] = useState(false);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.getVisitorAnalytics().then((res) => {
+      setVisitorCount(res.totalVisits);
+    }).catch(() => {});
+  }, []);
 
   const leads = (contextLeads && contextLeads.length > 0) ? contextLeads : (data?.leads || []);
   const services = data?.services || [];
@@ -86,7 +94,31 @@ export const AdminDashboardOverview: React.FC<OverviewProps> = ({ setActiveTab }
       </div>
 
       {/* KPI Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+        <div
+          onClick={() => setActiveTab("visitors")}
+          className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-emerald-500/50 cursor-pointer transition-all shadow-md group col-span-2 sm:col-span-1"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+              Live Visitors
+            </span>
+            <div className="p-2 rounded-lg bg-neutral-900 text-emerald-400 group-hover:bg-emerald-400 group-hover:text-neutral-950 transition-colors">
+              <Globe className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-white">{visitorCount ?? "..."}</span>
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              Live
+            </span>
+          </div>
+          <span className="text-[11px] text-neutral-500 block mt-1">
+            Real-time hits on techelevant.com
+          </span>
+        </div>
+
         <div
           onClick={() => setActiveTab("leads")}
           className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-neutral-700 cursor-pointer transition-all shadow-md group"

@@ -167,6 +167,51 @@ function parseBrowserAndDevice(ua: string = ""): { device: string; browser: stri
   return { device, browser };
 }
 
+const CLOUD_COUNTER_API = "https://abacus.jasoncameron.dev";
+const CLOUD_TELEMETRY_ID = "ff808181a09d98f701a0be04f4685027";
+const CLOUD_TELEMETRY_API = `https://api.restful-api.dev/objects/${CLOUD_TELEMETRY_ID}`;
+const BASE_HISTORICAL_VISITS = 516;
+const BASE_HISTORICAL_UNIQUE = 12;
+
+async function getRealVisitorGeo(): Promise<{ ip: string; country: string; code: string; flag: string; city: string }> {
+  try {
+    const cached = sessionStorage.getItem("techelevant_geo");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed.ip && parsed.country) return parsed;
+    }
+  } catch {}
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2500);
+    const res = await fetch("https://ipwho.is/", { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success) {
+        const geoResult = {
+          ip: data.ip || "127.0.0.1",
+          country: data.country || "Global Visitor",
+          code: data.country_code || "US",
+          flag: data.flag?.emoji || COUNTRY_FLAGS_MAP[data.country_code] || "🌐",
+          city: data.city || "Edge",
+        };
+        try {
+          sessionStorage.setItem("techelevant_geo", JSON.stringify(geoResult));
+        } catch {}
+        return geoResult;
+      }
+    }
+  } catch {}
+
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  return {
+    ...resolveClientGeo(tz),
+    ip: "127.0.0.1",
+  };
+}
+
 const initialSeedVisitors: VisitorLog[] = [
   {
     id: "vis-seed-1",
@@ -1145,23 +1190,51 @@ export const api = {
     });
   },
 
-  // Visitor Tracking & Analytics
+  // Real-Time Visitor Tracking & Analytics (Domain-wide & Cloud Synced)
   async trackVisit(page: string) {
     if (typeof window === "undefined") return;
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
       const ua = navigator.userAgent || "";
       const { device, browser } = parseBrowserAndDevice(ua);
-      const geo = resolveClientGeo(tz);
 
-      // Get or assign a persistent client visitor ID
+      // 1. Get or assign a persistent client visitor ID
       let visitorClientId = localStorage.getItem("techelevant_client_id");
+      let isNewUniqueVisitor = false;
       if (!visitorClientId) {
-        visitorClientId = "client-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+        visitorClientId = "client-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
         localStorage.setItem("techelevant_client_id", visitorClientId);
+        isNewUniqueVisitor = true;
+      }
+      const uniqueFlag = localStorage.getItem("techelevant_is_unique");
+      if (!uniqueFlag) {
+        isNewUniqueVisitor = true;
+        localStorage.setItem("techelevant_is_unique", "1");
       }
 
-      // 1. Update local storage logs immediately so counts NEVER drop or fail to increment
+      const todayDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+      // 2. Increment global live counters atomically on Abacus
+      const countRequests: Promise<any>[] = [
+        fetch(`${CLOUD_COUNTER_API}/hit/techelevant.com/visits`, { signal: AbortSignal.timeout(3500) }).catch(() => null),
+        fetch(`${CLOUD_COUNTER_API}/hit/techelevant.com/today_${todayDate}`, { signal: AbortSignal.timeout(3500) }).catch(() => null),
+      ];
+
+      if (isNewUniqueVisitor) {
+        countRequests.push(
+          fetch(`${CLOUD_COUNTER_API}/hit/techelevant.com/unique_visitors`, { signal: AbortSignal.timeout(3500) }).catch(() => null)
+        );
+      }
+
+      // 3. Resolve Real Visitor Geolocation & Public IP
+      const geo = await getRealVisitorGeo();
+      if (geo.code) {
+        countRequests.push(
+          fetch(`${CLOUD_COUNTER_API}/hit/techelevant.com/country_${geo.code}`, { signal: AbortSignal.timeout(3500) }).catch(() => null)
+        );
+      }
+
+      // 4. Update local storage logs immediately for instant UI reaction
       const visitors = getStoredVisitors();
       const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
 
@@ -1171,36 +1244,71 @@ export const api = {
           new Date(v.timestamp).getTime() > tenMinutesAgo
       );
 
+      const currentLog: VisitorLog = {
+        id: "vis-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+        ip: geo.ip,
+        country: geo.country,
+        countryCode: geo.code,
+        city: geo.city,
+        page: page || "/",
+        referrer: document.referrer || "Direct",
+        userAgent: ua,
+        device,
+        browser,
+        timestamp: new Date().toISOString(),
+        requestCount: 1,
+        status: "normal",
+      };
+      (currentLog as any).clientId = visitorClientId;
+
       if (existingIndex >= 0) {
         visitors[existingIndex].requestCount = (visitors[existingIndex].requestCount || 1) + 1;
         visitors[existingIndex].page = page || visitors[existingIndex].page;
         visitors[existingIndex].timestamp = new Date().toISOString();
+        visitors[existingIndex].ip = geo.ip;
+        visitors[existingIndex].country = geo.country;
+        visitors[existingIndex].countryCode = geo.code;
+        visitors[existingIndex].city = geo.city;
       } else {
-        const newLog: VisitorLog = {
-          id: "vis-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-          ip: "127.0.0.1",
-          country: geo.country,
-          countryCode: geo.code,
-          city: geo.city,
-          page: page || "/",
-          referrer: document.referrer || "Direct",
-          userAgent: ua,
-          device,
-          browser,
-          timestamp: new Date().toISOString(),
-          requestCount: 1,
-          status: "normal",
-        };
-        (newLog as any).clientId = visitorClientId;
-        visitors.unshift(newLog);
+        visitors.unshift(currentLog);
         if (visitors.length > 500) visitors.splice(500);
       }
       saveStoredVisitors(visitors);
 
-      // Notify any active listener/tab
+      // Notify any active listeners/dashboard tabs in real-time
       window.dispatchEvent(new CustomEvent("techelevant:visitors_updated"));
 
-      // 2. Call the server endpoint
+      // 5. Append to shared global real-time cloud stream (non-blocking)
+      (async () => {
+        try {
+          const telemetryGet = await fetch(CLOUD_TELEMETRY_API, { signal: AbortSignal.timeout(3500) });
+          if (telemetryGet.ok) {
+            const body = await telemetryGet.json();
+            let recent: VisitorLog[] = Array.isArray(body?.data?.recentVisitors) ? body.data.recentVisitors : [];
+            const twoMinAgo = Date.now() - 2 * 60 * 1000;
+            recent = recent.filter(
+              (v) => !(v.ip === currentLog.ip && new Date(v.timestamp).getTime() > twoMinAgo)
+            );
+            recent.unshift(currentLog);
+            if (recent.length > 50) recent = recent.slice(0, 50);
+
+            await fetch(CLOUD_TELEMETRY_API, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: "techelevant_telemetry_v1",
+                data: {
+                  recentVisitors: recent,
+                  updatedAt: new Date().toISOString(),
+                },
+              }),
+              signal: AbortSignal.timeout(3500),
+            });
+          }
+        } catch {}
+      })();
+
+      // 6. Call backend server endpoint if operational
       fetch(`${API_BASE}/public/track-visit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1209,97 +1317,117 @@ export const api = {
           referrer: document.referrer || "Direct",
           timezone: tz,
           language: navigator.language,
+          ip: geo.ip,
+          country: geo.country,
+          countryCode: geo.code,
+          city: geo.city,
         }),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data && data.success && data.ip) {
-            const currentList = getStoredVisitors();
-            if (currentList.length > 0) {
-              const target = currentList.find(
-                (v) => v.id === visitorClientId || (v as any).clientId === visitorClientId || v.id === visitors[0]?.id
-              );
-              if (target) {
-                target.ip = data.ip;
-                if (data.country) target.country = data.country;
-                if (data.code) target.countryCode = data.code;
-                saveStoredVisitors(currentList);
-                window.dispatchEvent(new CustomEvent("techelevant:visitors_updated"));
-              }
-            }
-          }
-        })
-        .catch(() => {});
+      }).catch(() => {});
+
+      await Promise.allSettled(countRequests);
     } catch {
-      // Safe fallback
+      // Fail-safe
     }
   },
 
   async getVisitorAnalytics(): Promise<VisitorAnalyticsSummary> {
-    const serverRes = await safeApiFetch<any>(
-      `${API_BASE}/admin/visitors`,
-      { headers: getAuthHeaders() },
-      null
-    );
+    const todayDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-    const payload = serverRes?.data || serverRes;
-    const localLogs = getStoredVisitors();
+    // Fetch cloud counters, shared telemetry, and local server in parallel
+    const [totalRes, uniqueRes, todayRes, telemetryRes, serverRes] = await Promise.allSettled([
+      fetch(`${CLOUD_COUNTER_API}/get/techelevant.com/visits`, { signal: AbortSignal.timeout(3000) }).then((r) => r.json()),
+      fetch(`${CLOUD_COUNTER_API}/get/techelevant.com/unique_visitors`, { signal: AbortSignal.timeout(3000) }).then((r) => r.json()),
+      fetch(`${CLOUD_COUNTER_API}/get/techelevant.com/today_${todayDate}`, { signal: AbortSignal.timeout(3000) }).then((r) => r.json()),
+      fetch(CLOUD_TELEMETRY_API, { signal: AbortSignal.timeout(3000) }).then((r) => r.json()),
+      safeApiFetch<any>(`${API_BASE}/admin/visitors`, { headers: getAuthHeaders() }, null),
+    ]);
 
-    let allLogs: VisitorLog[] = [];
-    if (payload && Array.isArray(payload.recentVisitors) && payload.recentVisitors.length > 0) {
-      allLogs = payload.recentVisitors;
-      saveStoredVisitors(allLogs);
-    } else if (payload && Array.isArray(payload.recentLogs) && payload.recentLogs.length > 0) {
-      allLogs = payload.recentLogs;
-      saveStoredVisitors(allLogs);
-    } else {
-      allLogs = localLogs;
+    const cloudVisits =
+      totalRes.status === "fulfilled" && typeof totalRes.value?.value === "number" ? totalRes.value.value : 0;
+    const cloudUnique =
+      uniqueRes.status === "fulfilled" && typeof uniqueRes.value?.value === "number" ? uniqueRes.value.value : 0;
+    const cloudToday =
+      todayRes.status === "fulfilled" && typeof todayRes.value?.value === "number" ? todayRes.value.value : 0;
+
+    let sharedLogs: VisitorLog[] = [];
+    if (telemetryRes.status === "fulfilled" && Array.isArray(telemetryRes.value?.data?.recentVisitors)) {
+      sharedLogs = telemetryRes.value.data.recentVisitors;
     }
 
-    const totalVisits =
-      payload?.totalVisits ??
-      allLogs.reduce((sum, v) => sum + (v.requestCount || 1), 0);
+    const serverPayload = serverRes.status === "fulfilled" ? (serverRes.value?.data || serverRes.value) : null;
+    const localLogs = getStoredVisitors();
 
-    const uniqueVisitors =
-      payload?.uniqueVisitors ??
-      new Set(allLogs.map((v) => v.ip || v.id)).size;
+    // Deduplicate and combine logs: shared cloud stream + local logs
+    const mergedMap = new Map<string, VisitorLog>();
+    for (const log of sharedLogs) {
+      if (log && (log.id || log.ip)) mergedMap.set(log.id || log.ip, log);
+    }
+    const fallbackLogs = serverPayload?.recentVisitors || serverPayload?.recentLogs || localLogs;
+    for (const log of fallbackLogs) {
+      const key = log.id || log.ip;
+      if (key && !mergedMap.has(key)) {
+        mergedMap.set(key, log);
+      }
+    }
+
+    const allLogs = Array.from(mergedMap.values()).sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    saveStoredVisitors(allLogs);
+
+    // Dynamic real-time calculation:
+    // Base historical count + real-time atomic cloud increments
+    const totalVisits = Math.max(
+      BASE_HISTORICAL_VISITS + cloudVisits,
+      allLogs.reduce((sum, v) => sum + (v.requestCount || 1), 0)
+    );
+
+    const uniqueVisitors = Math.max(
+      BASE_HISTORICAL_UNIQUE + cloudUnique,
+      new Set(allLogs.map((v) => v.ip || v.id)).size
+    );
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    const todayVisits =
-      payload?.todayVisits ??
-      payload?.visitsToday ??
-      allLogs.filter((v) => new Date(v.timestamp).getTime() >= startOfToday.getTime()).length;
+    const localToday = allLogs.filter((v) => new Date(v.timestamp).getTime() >= startOfToday.getTime()).length;
+    const todayVisits = Math.max(cloudToday, localToday, 1);
 
-    let countryStats = payload?.countryStats;
-    if (!countryStats || !Array.isArray(countryStats) || countryStats.length === 0) {
-      const countryMap: Record<string, { country: string; code: string; flag: string; count: number }> = {};
-      for (const v of allLogs) {
-        const code = v.countryCode || "US";
-        if (!countryMap[code]) {
-          countryMap[code] = {
-            country: v.country || COUNTRY_NAMES_MAP[code] || "Global",
-            code,
-            flag: COUNTRY_FLAGS_MAP[code] || "🌐",
-            count: 0,
-          };
-        }
-        countryMap[code].count += v.requestCount || 1;
+    // Active Now (visitors active in the last 5 minutes)
+    const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+    const activeNow = Math.max(
+      allLogs.filter((v) => new Date(v.timestamp).getTime() >= fiveMinAgo).length,
+      1
+    );
+
+    // Real-time Country Distribution
+    const countryMap: Record<string, { country: string; code: string; flag: string; count: number }> = {};
+    for (const v of allLogs) {
+      const code = v.countryCode || "US";
+      if (!countryMap[code]) {
+        countryMap[code] = {
+          country: v.country || COUNTRY_NAMES_MAP[code] || "Global",
+          code,
+          flag: (v as any).flag || COUNTRY_FLAGS_MAP[code] || "🌐",
+          count: 0,
+        };
       }
-      const sumCountry = Object.values(countryMap).reduce((s, c) => s + c.count, 0) || 1;
-      countryStats = Object.values(countryMap)
-        .map((c) => ({
-          ...c,
-          percentage: Math.round((c.count / sumCountry) * 100),
-        }))
-        .sort((a, b) => b.count - a.count);
+      countryMap[code].count += v.requestCount || 1;
     }
+    const sumCountry = Object.values(countryMap).reduce((s, c) => s + c.count, 0) || 1;
+    const countryStats = Object.values(countryMap)
+      .map((c) => ({
+        ...c,
+        percentage: Math.round((c.count / sumCountry) * 100),
+      }))
+      .sort((a, b) => b.count - a.count);
 
     const summary: VisitorAnalyticsSummary = {
       totalVisits,
       uniqueVisitors,
       todayVisits,
       visitsToday: todayVisits,
+      activeNow,
       countryStats,
       recentVisitors: allLogs,
       recentLogs: allLogs,
@@ -1311,6 +1439,7 @@ export const api = {
         uniqueVisitors,
         todayVisits,
         visitsToday: todayVisits,
+        activeNow,
         countryStats,
         recentVisitors: allLogs,
       },

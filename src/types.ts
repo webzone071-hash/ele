@@ -242,6 +242,7 @@ export interface VisitorAnalyticsSummary {
   uniqueVisitors: number;
   todayVisits?: number;
   visitsToday?: number;
+  activeNow?: number;
   recentVisitors?: VisitorLog[];
   recentLogs?: VisitorLog[];
   countryStats?: {
