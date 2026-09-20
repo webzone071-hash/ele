@@ -11,6 +11,8 @@ import {
   NavigationItem,
   SocialLink,
   Lead,
+  VisitorLog,
+  VisitorAnalyticsSummary,
 } from "../types";
 import { initialData } from "../data/initialData";
 
@@ -90,6 +92,158 @@ function getStoredLeads(): Lead[] {
 function saveStoredLeads(leads: Lead[]) {
   try {
     localStorage.setItem("techelevant_leads", JSON.stringify(leads));
+  } catch {}
+}
+
+const COUNTRY_FLAGS_MAP: Record<string, string> = {
+  US: "🇺🇸",
+  GB: "🇬🇧",
+  DE: "🇩🇪",
+  BD: "🇧🇩",
+  CA: "🇨🇦",
+  AE: "🇦🇪",
+  SG: "🇸🇬",
+  AU: "🇦🇺",
+  NL: "🇳🇱",
+  FR: "🇫🇷",
+  JP: "🇯🇵",
+  IN: "🇮🇳",
+  CH: "🇨🇭",
+  SE: "🇸🇪",
+  BR: "🇧🇷",
+};
+
+const COUNTRY_NAMES_MAP: Record<string, string> = {
+  US: "United States",
+  GB: "United Kingdom",
+  DE: "Germany",
+  BD: "Bangladesh",
+  CA: "Canada",
+  AE: "United Arab Emirates",
+  SG: "Singapore",
+  AU: "Australia",
+  NL: "Netherlands",
+  FR: "France",
+  JP: "Japan",
+  IN: "India",
+  CH: "Switzerland",
+  SE: "Sweden",
+  BR: "Brazil",
+};
+
+function resolveClientGeo(tz: string): { country: string; code: string; flag: string; city: string } {
+  const t = (tz || "").toLowerCase();
+  if (t.includes("dhaka")) return { country: "Bangladesh", code: "BD", flag: "🇧🇩", city: "Dhaka" };
+  if (t.includes("london")) return { country: "United Kingdom", code: "GB", flag: "🇬🇧", city: "London" };
+  if (t.includes("dubai")) return { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", city: "Dubai" };
+  if (t.includes("new_york")) return { country: "United States", code: "US", flag: "🇺🇸", city: "New York" };
+  if (t.includes("los_angeles")) return { country: "United States", code: "US", flag: "🇺🇸", city: "Los Angeles" };
+  if (t.includes("chicago")) return { country: "United States", code: "US", flag: "🇺🇸", city: "Chicago" };
+  if (t.includes("toronto")) return { country: "Canada", code: "CA", flag: "🇨🇦", city: "Toronto" };
+  if (t.includes("berlin") || t.includes("frankfurt")) return { country: "Germany", code: "DE", flag: "🇩🇪", city: "Frankfurt" };
+  if (t.includes("paris")) return { country: "France", code: "FR", flag: "🇫🇷", city: "Paris" };
+  if (t.includes("tokyo")) return { country: "Japan", code: "JP", flag: "🇯🇵", city: "Tokyo" };
+  if (t.includes("kolkata") || t.includes("calcutta")) return { country: "India", code: "IN", flag: "🇮🇳", city: "Kolkata" };
+  if (t.includes("singapore")) return { country: "Singapore", code: "SG", flag: "🇸🇬", city: "Singapore" };
+  if (t.includes("sydney")) return { country: "Australia", code: "AU", flag: "🇦🇺", city: "Sydney" };
+  if (t.includes("amsterdam")) return { country: "Netherlands", code: "NL", flag: "🇳🇱", city: "Amsterdam" };
+  if (t.startsWith("america/")) return { country: "United States", code: "US", flag: "🇺🇸", city: tz.split("/")[1]?.replace(/_/g, " ") || "United States" };
+  if (t.startsWith("europe/")) return { country: "United Kingdom", code: "GB", flag: "🇬🇧", city: tz.split("/")[1]?.replace(/_/g, " ") || "Europe" };
+  if (t.startsWith("asia/")) return { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", city: tz.split("/")[1]?.replace(/_/g, " ") || "Asia" };
+  return { country: "Global Visitor", code: "US", flag: "🌐", city: "Edge Location" };
+}
+
+function parseBrowserAndDevice(ua: string = ""): { device: string; browser: string } {
+  let device = "Desktop";
+  if (/mobile/i.test(ua)) device = "Mobile";
+  else if (/tablet|ipad/i.test(ua)) device = "Tablet";
+
+  let browser = "Chrome";
+  if (/edg/i.test(ua)) browser = "Edge";
+  else if (/firefox/i.test(ua)) browser = "Firefox";
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = "Safari";
+  else if (/opera|opr/i.test(ua)) browser = "Opera";
+
+  return { device, browser };
+}
+
+const initialSeedVisitors: VisitorLog[] = [
+  {
+    id: "vis-seed-1",
+    ip: "202.83.124.76",
+    country: "Bangladesh",
+    countryCode: "BD",
+    city: "Dhaka",
+    page: "/",
+    referrer: "Direct",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/153.0.0.0",
+    device: "Desktop",
+    browser: "Chrome",
+    timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    requestCount: 5,
+    status: "normal",
+  },
+  {
+    id: "vis-seed-2",
+    ip: "74.125.206.100",
+    country: "United States",
+    countryCode: "US",
+    city: "Mountain View",
+    page: "/services",
+    referrer: "Google Search",
+    userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/153.0.0.0",
+    device: "Desktop",
+    browser: "Chrome",
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    requestCount: 3,
+    status: "normal",
+  },
+  {
+    id: "vis-seed-3",
+    ip: "82.165.197.1",
+    country: "United Kingdom",
+    countryCode: "GB",
+    city: "London",
+    page: "/portfolio",
+    referrer: "LinkedIn",
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Safari/605.1.15",
+    device: "Mobile",
+    browser: "Safari",
+    timestamp: new Date(Date.now() - 1000 * 3600 * 3).toISOString(),
+    requestCount: 4,
+    status: "normal",
+  },
+  {
+    id: "vis-seed-4",
+    ip: "94.200.12.44",
+    country: "United Arab Emirates",
+    countryCode: "AE",
+    city: "Dubai",
+    page: "/get-in-touch",
+    referrer: "Direct",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Edge/120.0.0.0",
+    device: "Desktop",
+    browser: "Edge",
+    timestamp: new Date(Date.now() - 1000 * 3600 * 8).toISOString(),
+    requestCount: 2,
+    status: "normal",
+  },
+];
+
+function getStoredVisitors(): VisitorLog[] {
+  try {
+    const raw = localStorage.getItem("techelevant_visitors");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+  return initialSeedVisitors;
+}
+
+function saveStoredVisitors(visitors: VisitorLog[]) {
+  try {
+    localStorage.setItem("techelevant_visitors", JSON.stringify(visitors));
   } catch {}
 }
 
@@ -992,73 +1146,186 @@ export const api = {
   },
 
   // Visitor Tracking & Analytics
-  async getVisitorAnalytics() {
-    const fallbackData = {
-      summary: {
-        totalVisitors: 1248,
-        pageViews: 3890,
-        uniqueCountries: 24,
-        threatsBlocked: 42,
+  async trackVisit(page: string) {
+    if (typeof window === "undefined") return;
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      const ua = navigator.userAgent || "";
+      const { device, browser } = parseBrowserAndDevice(ua);
+      const geo = resolveClientGeo(tz);
+
+      // Get or assign a persistent client visitor ID
+      let visitorClientId = localStorage.getItem("techelevant_client_id");
+      if (!visitorClientId) {
+        visitorClientId = "client-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+        localStorage.setItem("techelevant_client_id", visitorClientId);
+      }
+
+      // 1. Update local storage logs immediately so counts NEVER drop or fail to increment
+      const visitors = getStoredVisitors();
+      const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+
+      let existingIndex = visitors.findIndex(
+        (v) =>
+          (v.id === visitorClientId || (v as any).clientId === visitorClientId) &&
+          new Date(v.timestamp).getTime() > tenMinutesAgo
+      );
+
+      if (existingIndex >= 0) {
+        visitors[existingIndex].requestCount = (visitors[existingIndex].requestCount || 1) + 1;
+        visitors[existingIndex].page = page || visitors[existingIndex].page;
+        visitors[existingIndex].timestamp = new Date().toISOString();
+      } else {
+        const newLog: VisitorLog = {
+          id: "vis-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+          ip: "127.0.0.1",
+          country: geo.country,
+          countryCode: geo.code,
+          city: geo.city,
+          page: page || "/",
+          referrer: document.referrer || "Direct",
+          userAgent: ua,
+          device,
+          browser,
+          timestamp: new Date().toISOString(),
+          requestCount: 1,
+          status: "normal",
+        };
+        (newLog as any).clientId = visitorClientId;
+        visitors.unshift(newLog);
+        if (visitors.length > 500) visitors.splice(500);
+      }
+      saveStoredVisitors(visitors);
+
+      // Notify any active listener/tab
+      window.dispatchEvent(new CustomEvent("techelevant:visitors_updated"));
+
+      // 2. Call the server endpoint
+      fetch(`${API_BASE}/public/track-visit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          page,
+          referrer: document.referrer || "Direct",
+          timezone: tz,
+          language: navigator.language,
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.success && data.ip) {
+            const currentList = getStoredVisitors();
+            if (currentList.length > 0) {
+              const target = currentList.find(
+                (v) => v.id === visitorClientId || (v as any).clientId === visitorClientId || v.id === visitors[0]?.id
+              );
+              if (target) {
+                target.ip = data.ip;
+                if (data.country) target.country = data.country;
+                if (data.code) target.countryCode = data.code;
+                saveStoredVisitors(currentList);
+                window.dispatchEvent(new CustomEvent("techelevant:visitors_updated"));
+              }
+            }
+          }
+        })
+        .catch(() => {});
+    } catch {
+      // Safe fallback
+    }
+  },
+
+  async getVisitorAnalytics(): Promise<VisitorAnalyticsSummary> {
+    const serverRes = await safeApiFetch<any>(
+      `${API_BASE}/admin/visitors`,
+      { headers: getAuthHeaders() },
+      null
+    );
+
+    const payload = serverRes?.data || serverRes;
+    const localLogs = getStoredVisitors();
+
+    let allLogs: VisitorLog[] = [];
+    if (payload && Array.isArray(payload.recentVisitors) && payload.recentVisitors.length > 0) {
+      allLogs = payload.recentVisitors;
+      saveStoredVisitors(allLogs);
+    } else if (payload && Array.isArray(payload.recentLogs) && payload.recentLogs.length > 0) {
+      allLogs = payload.recentLogs;
+      saveStoredVisitors(allLogs);
+    } else {
+      allLogs = localLogs;
+    }
+
+    const totalVisits =
+      payload?.totalVisits ??
+      allLogs.reduce((sum, v) => sum + (v.requestCount || 1), 0);
+
+    const uniqueVisitors =
+      payload?.uniqueVisitors ??
+      new Set(allLogs.map((v) => v.ip || v.id)).size;
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayVisits =
+      payload?.todayVisits ??
+      payload?.visitsToday ??
+      allLogs.filter((v) => new Date(v.timestamp).getTime() >= startOfToday.getTime()).length;
+
+    let countryStats = payload?.countryStats;
+    if (!countryStats || !Array.isArray(countryStats) || countryStats.length === 0) {
+      const countryMap: Record<string, { country: string; code: string; flag: string; count: number }> = {};
+      for (const v of allLogs) {
+        const code = v.countryCode || "US";
+        if (!countryMap[code]) {
+          countryMap[code] = {
+            country: v.country || COUNTRY_NAMES_MAP[code] || "Global",
+            code,
+            flag: COUNTRY_FLAGS_MAP[code] || "🌐",
+            count: 0,
+          };
+        }
+        countryMap[code].count += v.requestCount || 1;
+      }
+      const sumCountry = Object.values(countryMap).reduce((s, c) => s + c.count, 0) || 1;
+      countryStats = Object.values(countryMap)
+        .map((c) => ({
+          ...c,
+          percentage: Math.round((c.count / sumCountry) * 100),
+        }))
+        .sort((a, b) => b.count - a.count);
+    }
+
+    const summary: VisitorAnalyticsSummary = {
+      totalVisits,
+      uniqueVisitors,
+      todayVisits,
+      visitsToday: todayVisits,
+      countryStats,
+      recentVisitors: allLogs,
+      recentLogs: allLogs,
+      topPages: [],
+      countryBreakdown: [],
+      deviceBreakdown: [],
+      data: {
+        totalVisits,
+        uniqueVisitors,
+        todayVisits,
+        visitsToday: todayVisits,
+        countryStats,
+        recentVisitors: allLogs,
       },
-      recentVisitors: [
-        {
-          id: "v1",
-          ip: "74.125.206.100",
-          country: "United States",
-          city: "Mountain View",
-          page: "/",
-          referrer: "Google Search",
-          device: "Desktop",
-          browser: "Chrome",
-          timestamp: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-        },
-        {
-          id: "v2",
-          ip: "82.165.197.1",
-          country: "United Kingdom",
-          city: "London",
-          page: "/services",
-          referrer: "Direct",
-          device: "Mobile",
-          browser: "Safari",
-          timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-        },
-        {
-          id: "v3",
-          ip: "94.200.12.44",
-          country: "United Arab Emirates",
-          city: "Dubai",
-          page: "/portfolio",
-          referrer: "LinkedIn",
-          device: "Desktop",
-          browser: "Edge",
-          timestamp: new Date(Date.now() - 1000 * 60 * 32).toISOString(),
-        },
-        {
-          id: "v4",
-          ip: "185.190.140.22",
-          country: "Germany",
-          city: "Frankfurt",
-          page: "/get-in-touch",
-          referrer: "Clutch",
-          device: "Desktop",
-          browser: "Firefox",
-          timestamp: new Date(Date.now() - 1000 * 60 * 48).toISOString(),
-        },
-      ],
-      geoDistribution: [
-        { country: "United States", count: 540, percentage: 43 },
-        { country: "United Kingdom", count: 260, percentage: 21 },
-        { country: "United Arab Emirates", count: 180, percentage: 14 },
-        { country: "Germany", count: 120, percentage: 10 },
-        { country: "Other", count: 148, percentage: 12 },
-      ],
     };
 
-    return safeApiFetch(`${API_BASE}/admin/visitors`, { headers: getAuthHeaders() }, fallbackData);
+    return summary;
   },
 
   async clearVisitorLogs() {
+    try {
+      localStorage.removeItem("techelevant_visitors");
+    } catch {}
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("techelevant:visitors_updated"));
+    }
     return safeApiFetch(`${API_BASE}/admin/visitors/clear`, { method: "POST", headers: getAuthHeaders() }, { success: true });
   },
 

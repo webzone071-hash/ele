@@ -1090,6 +1090,36 @@
   ],
   "visitors": [
     {
+      "id": "vis-1789892457794-273",
+      "ip": "127.0.0.1",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/contact",
+      "referrer": "Direct",
+      "userAgent": "curl/7.88.1",
+      "device": "Desktop",
+      "browser": "Bot/CLI",
+      "timestamp": "2026-09-20T08:21:24.688Z",
+      "requestCount": 3,
+      "status": "normal"
+    },
+    {
+      "id": "vis-1789892129250-164",
+      "ip": "202.83.124.76",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "city": "Dhaka",
+      "page": "/",
+      "referrer": "https://aistudio.google.com/",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "device": "Desktop",
+      "browser": "Chrome",
+      "timestamp": "2026-09-20T08:15:29.253Z",
+      "requestCount": 2,
+      "status": "normal"
+    },
+    {
       "id": "vis-1788517242346-423",
       "ip": "202.83.124.77",
       "country": "Bangladesh",

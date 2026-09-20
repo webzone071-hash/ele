@@ -2241,22 +2241,19 @@ async function startServer() {
 
       return res.json({
         success: true,
-
+        totalVisits,
+        uniqueVisitors: uniqueIps,
+        todayVisits,
+        visitsToday: todayVisits,
+        countryStats,
+        recentVisitors: visitors.slice(0, 100),
         data: {
           totalVisits,
-
-          uniqueVisitors:
-            uniqueIps,
-
+          uniqueVisitors: uniqueIps,
           todayVisits,
-
+          visitsToday: todayVisits,
           countryStats,
-
-          recentVisitors:
-            visitors.slice(
-              0,
-              100
-            ),
+          recentVisitors: visitors.slice(0, 100),
         },
       });
     }
@@ -2821,7 +2818,7 @@ async function startServer() {
   app.post(
     "/api/admin/settings/upload-asset",
     requireAdmin,
-    upload.single("file"),
+    upload.single("file") as any,
     (
       req: Request,
       res: Response
@@ -4949,7 +4946,7 @@ async function startServer() {
   app.post(
     "/api/admin/media",
     requireAdmin,
-    upload.single("file"),
+    upload.single("file") as any,
     (
       req: Request,
       res: Response

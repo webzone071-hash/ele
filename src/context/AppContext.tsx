@@ -140,21 +140,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Public visitor tracking per page view
   useEffect(() => {
     if (!currentPath.startsWith("/admin")) {
-      try {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        fetch("/api/public/track-visit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            page: currentPath,
-            referrer: document.referrer || "Direct",
-            timezone: tz,
-            language: navigator.language,
-          }),
-        }).catch(() => {});
-      } catch {
-        // Silent
-      }
+      api.trackVisit(currentPath).catch(() => {});
     }
   }, [currentPath]);
 

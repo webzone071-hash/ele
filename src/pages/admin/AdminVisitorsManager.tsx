@@ -35,7 +35,8 @@ export const AdminVisitorsManager: React.FC = () => {
       if (isManual) setIsRefreshing(true);
       else setIsLoading(true);
 
-      const data = await api.getVisitorAnalytics();
+      const raw = await api.getVisitorAnalytics();
+      const data = (raw as any)?.data && (raw as any)?.totalVisits === undefined ? (raw as any).data : raw;
       setAnalytics(data);
       if (isManual) {
         showToast("Visitor telemetry refreshed.", "info");
@@ -53,7 +54,18 @@ export const AdminVisitorsManager: React.FC = () => {
     const interval = setInterval(() => {
       fetchVisitors(false);
     }, 15000); // Auto-refresh telemetry every 15s
-    return () => clearInterval(interval);
+
+    const handleVisitorsUpdated = () => {
+      fetchVisitors(false);
+    };
+    window.addEventListener("techelevant:visitors_updated", handleVisitorsUpdated);
+    window.addEventListener("storage", handleVisitorsUpdated);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("techelevant:visitors_updated", handleVisitorsUpdated);
+      window.removeEventListener("storage", handleVisitorsUpdated);
+    };
   }, []);
 
   const handleClearLogs = async () => {
@@ -91,15 +103,23 @@ export const AdminVisitorsManager: React.FC = () => {
     }
   };
 
-  const filteredVisitors = (analytics?.recentVisitors || []).filter((v) => {
+  const rawVisitors = analytics?.recentVisitors || analytics?.recentLogs || [];
+  const filteredVisitors = rawVisitors.filter((v) => {
+    const ipStr = (v.ip || "").toLowerCase();
+    const countryStr = (v.country || "").toLowerCase();
+    const cityStr = (v.city || "").toLowerCase();
+    const pageStr = (v.page || "").toLowerCase();
+    const q = searchQuery.toLowerCase();
+
     const matchesSearch =
-      v.ip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      v.page.toLowerCase().includes(searchQuery.toLowerCase());
+      !searchQuery ||
+      ipStr.includes(q) ||
+      countryStr.includes(q) ||
+      cityStr.includes(q) ||
+      pageStr.includes(q);
 
     const matchesCountry =
-      countryFilter === "all" || v.countryCode.toLowerCase() === countryFilter.toLowerCase();
+      countryFilter === "all" || (v.countryCode || "").toLowerCase() === countryFilter.toLowerCase();
 
     return matchesSearch && matchesCountry;
   });
@@ -173,7 +193,7 @@ export const AdminVisitorsManager: React.FC = () => {
               Total Page Visits
             </span>
             <span className="text-3xl font-black text-white tracking-tight">
-              {analytics?.totalVisits ?? "--"}
+              {analytics?.totalVisits ?? rawVisitors.reduce((s, v) => s + (v.requestCount || 1), 0)}
             </span>
             <span className="text-[11px] text-emerald-400 font-medium block mt-1 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -191,7 +211,7 @@ export const AdminVisitorsManager: React.FC = () => {
               Unique Visitors
             </span>
             <span className="text-3xl font-black text-white tracking-tight">
-              {analytics?.uniqueVisitors ?? "--"}
+              {analytics?.uniqueVisitors ?? new Set(rawVisitors.map((v) => v.ip || v.id)).size}
             </span>
             <span className="text-[11px] text-neutral-400 font-medium block mt-1">
               Distinct IP addresses
@@ -208,7 +228,7 @@ export const AdminVisitorsManager: React.FC = () => {
               Today's Visits
             </span>
             <span className="text-3xl font-black text-white tracking-tight">
-              {analytics?.todayVisits ?? "--"}
+              {analytics?.todayVisits ?? analytics?.visitsToday ?? 0}
             </span>
             <span className="text-[11px] text-emerald-400 font-medium block mt-1">
               24-hour cycle

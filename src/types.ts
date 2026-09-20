@@ -240,11 +240,21 @@ export interface VisitorLog {
 export interface VisitorAnalyticsSummary {
   totalVisits: number;
   uniqueVisitors: number;
-  visitsToday: number;
-  recentLogs: VisitorLog[];
-  topPages: { page: string; count: number }[];
-  countryBreakdown: { country: string; count: number }[];
-  deviceBreakdown: { device: string; count: number }[];
+  todayVisits?: number;
+  visitsToday?: number;
+  recentVisitors?: VisitorLog[];
+  recentLogs?: VisitorLog[];
+  countryStats?: {
+    country: string;
+    code: string;
+    flag: string;
+    count: number;
+    percentage: number;
+  }[];
+  topPages?: { page: string; count: number }[];
+  countryBreakdown?: { country: string; count: number }[];
+  deviceBreakdown?: { device: string; count: number }[];
+  data?: any;
 }
 
 export interface BlockedIp {
