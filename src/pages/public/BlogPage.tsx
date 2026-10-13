@@ -180,12 +180,18 @@ export const BlogPage: React.FC = () => {
             >
               {/* Cover Image */}
               <div className="lg:col-span-7 relative h-64 sm:h-80 lg:h-full min-h-[300px] overflow-hidden bg-neutral-900">
-                <img
-                  src={featuredPost.coverImage}
-                  alt={featuredPost.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
+                {featuredPost.coverImage ? (
+                  <img
+                    src={featuredPost.coverImage}
+                    alt={featuredPost.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 text-neutral-600">
+                    <BookOpen className="w-16 h-16" />
+                  </div>
+                )}
                 <div className="absolute top-4 left-4 flex items-center gap-2">
                   <span className="px-3 py-1 rounded-full bg-neutral-950/90 backdrop-blur-xs text-white text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
                     <Sparkles className="w-3 h-3 text-amber-400" />
@@ -314,12 +320,18 @@ export const BlogPage: React.FC = () => {
                   <div>
                     {/* Thumbnail */}
                     <div className="relative h-48 sm:h-52 overflow-hidden bg-neutral-900">
-                      <img
-                        src={post.coverImage}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                      {post.coverImage ? (
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 text-neutral-600">
+                          <BookOpen className="w-10 h-10" />
+                        </div>
+                      )}
                       <div className="absolute top-3 left-3 flex items-center gap-2">
                         <span className="px-2.5 py-1 rounded-full bg-neutral-950/85 backdrop-blur-xs text-white text-[11px] font-semibold tracking-wide">
                           {post.category}

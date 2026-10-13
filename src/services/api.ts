@@ -1317,6 +1317,83 @@ export const api = {
     });
   },
 
+  // General Image & Media Upload (for Blogs, Portfolio, Services, Avatars, etc.)
+  async uploadImage(file: File): Promise<{ success: boolean; url: string; filename: string }> {
+    // 1. Try server-side multipart media upload
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const token = localStorage.getItem("apex_admin_token");
+      const res = await fetch(`${API_BASE}/admin/media`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.media?.url) {
+          return { success: true, url: data.media.url, filename: file.name };
+        }
+        if (data?.url) {
+          return { success: true, url: data.url, filename: file.name };
+        }
+      }
+    } catch (err) {
+      console.warn("Direct /api/admin/media upload fell back to client optimizer:", err);
+    }
+
+    // 2. Client-side Canvas Image Optimizer fallback (resizes large camera/phone photos to max 1920px)
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const rawResult = e.target?.result as string;
+        if (!file.type.startsWith("image/") || file.type === "image/svg+xml") {
+          resolve({ success: true, url: rawResult, filename: file.name });
+          return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const maxDimension = 1920;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              resolve({ success: true, url: rawResult, filename: file.name });
+              return;
+            }
+
+            ctx.drawImage(img, 0, 0, width, height);
+            const outputMime = file.type === "image/png" ? "image/png" : "image/jpeg";
+            const optimizedDataUrl = canvas.toDataURL(outputMime, 0.88);
+            resolve({ success: true, url: optimizedDataUrl, filename: file.name });
+          } catch {
+            resolve({ success: true, url: rawResult, filename: file.name });
+          }
+        };
+        img.onerror = () => resolve({ success: true, url: rawResult, filename: file.name });
+        img.src = rawResult;
+      };
+      reader.onerror = () => reject(new Error("Could not read image file from device."));
+      reader.readAsDataURL(file);
+    });
+  },
+
   // Real-Time Visitor Tracking & Analytics (Domain-wide & Cloud Synced)
   async trackVisit(page: string) {
     if (typeof window === "undefined") return;

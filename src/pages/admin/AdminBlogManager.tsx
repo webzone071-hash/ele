@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useApp } from "../../context/AppContext";
 import { api } from "../../services/api";
 import { BlogPost } from "../../types";
@@ -32,6 +32,11 @@ import {
   Heading,
   Bold,
   Quote,
+  Upload,
+  Image as ImageIcon,
+  Camera,
+  Link as LinkIcon,
+  UploadCloud,
 } from "lucide-react";
 
 const PRESET_IMAGES = [
@@ -81,6 +86,115 @@ export const AdminBlogManager: React.FC = () => {
   const [newTagInput, setNewTagInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // File Upload State & Refs
+  const [coverTab, setCoverTab] = useState<"upload" | "url">("upload");
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingOg, setIsUploadingOg] = useState(false);
+  const [isUploadingContentImg, setIsUploadingContentImg] = useState(false);
+
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
+  const avatarFileInputRef = useRef<HTMLInputElement>(null);
+  const ogFileInputRef = useRef<HTMLInputElement>(null);
+  const contentImgFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload Handlers
+  const handleCoverUpload = async (file: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose a valid image file (PNG, JPG, WebP, GIF, SVG).", "error");
+      return;
+    }
+    try {
+      setIsUploadingCover(true);
+      const res = await api.uploadImage(file);
+      if (res.success && res.url) {
+        setEditingPost((prev) => ({
+          ...prev,
+          coverImage: res.url,
+          ogImage: prev?.ogImage ? prev.ogImage : res.url,
+        }));
+        showToast("Cover image uploaded successfully!", "success");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to upload image", "error");
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose a valid image file.", "error");
+      return;
+    }
+    try {
+      setIsUploadingAvatar(true);
+      const res = await api.uploadImage(file);
+      if (res.success && res.url) {
+        setEditingPost((prev) => ({
+          ...prev,
+          authorAvatar: res.url,
+        }));
+        showToast("Author photo uploaded successfully!", "success");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to upload author photo", "error");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleOgImageUpload = async (file: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose a valid image file.", "error");
+      return;
+    }
+    try {
+      setIsUploadingOg(true);
+      const res = await api.uploadImage(file);
+      if (res.success && res.url) {
+        setEditingPost((prev) => ({
+          ...prev,
+          ogImage: res.url,
+        }));
+        showToast("Social OG image uploaded successfully!", "success");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to upload social image", "error");
+    } finally {
+      setIsUploadingOg(false);
+    }
+  };
+
+  const handleContentImageUpload = async (file: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose a valid image file.", "error");
+      return;
+    }
+    try {
+      setIsUploadingContentImg(true);
+      const res = await api.uploadImage(file);
+      if (res.success && res.url) {
+        const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+        const markdownImg = `\n\n![${cleanName}](${res.url})\n\n`;
+        setEditingPost((prev) => ({
+          ...prev,
+          content: (prev?.content || "") + markdownImg,
+        }));
+        showToast("Image uploaded and inserted into article content!", "success");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to upload article image", "error");
+    } finally {
+      setIsUploadingContentImg(false);
+    }
+  };
+
   // Load all blogs including drafts
   const loadPosts = async () => {
     try {
@@ -121,7 +235,7 @@ export const AdminBlogManager: React.FC = () => {
       slug: "",
       excerpt: "",
       content: "## Overview\n\nEnter your technical analysis and code examples here.\n\n```typescript\n// Example Code\n```",
-      coverImage: PRESET_IMAGES[0].url,
+      coverImage: "",
       category: "Enterprise Architecture",
       authorName: "Tech Elevant Engineering",
       authorRole: "Principal Software Architect",
@@ -138,6 +252,7 @@ export const AdminBlogManager: React.FC = () => {
       robots: "index, follow",
       structuredDataType: "TechArticle",
     };
+    setCoverTab("upload");
     setEditingPost(newPost);
     setActiveModalTab("content");
     setIsModalOpen(true);
@@ -146,6 +261,7 @@ export const AdminBlogManager: React.FC = () => {
   // Open Edit Modal
   const handleOpenEdit = (post: BlogPost) => {
     setEditingPost({ ...post });
+    setCoverTab(post.coverImage && post.coverImage.startsWith("http") && !post.coverImage.includes("/uploads/") ? "url" : "upload");
     setActiveModalTab("content");
     setIsModalOpen(true);
   };
@@ -492,11 +608,17 @@ export const AdminBlogManager: React.FC = () => {
                     {/* Article Column */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={post.coverImage}
-                          alt={post.title}
-                          className="w-12 h-12 rounded-lg object-cover shrink-0 border border-neutral-800"
-                        />
+                        {post.coverImage ? (
+                          <img
+                            src={post.coverImage}
+                            alt={post.title}
+                            className="w-12 h-12 rounded-lg object-cover shrink-0 border border-neutral-800"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center shrink-0 text-neutral-600">
+                            <BookOpen className="w-5 h-5" />
+                          </div>
+                        )}
                         <div className="min-w-0 max-w-xs sm:max-w-sm">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-white text-xs truncate block hover:text-blue-400 cursor-pointer" onClick={() => handleOpenEdit(post)}>
@@ -525,11 +647,17 @@ export const AdminBlogManager: React.FC = () => {
                     {/* Author */}
                     <td className="py-3 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <img
-                          src={post.authorAvatar}
-                          alt={post.authorName}
-                          className="w-5 h-5 rounded-full object-cover"
-                        />
+                        {post.authorAvatar ? (
+                          <img
+                            src={post.authorAvatar}
+                            alt={post.authorName}
+                            className="w-5 h-5 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center text-[9px] text-neutral-400 shrink-0">
+                            {post.authorName?.[0] || "A"}
+                          </div>
+                        )}
                         <span className="text-neutral-300 text-xs font-medium">
                           {post.authorName}
                         </span>
@@ -838,41 +966,181 @@ export const AdminBlogManager: React.FC = () => {
                     />
                   </div>
 
-                  {/* Cover Image Picker */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-                      Cover Image URL
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="url"
-                        placeholder="https://images.unsplash.com/photo-..."
-                        value={editingPost.coverImage || ""}
-                        onChange={(e) => setEditingPost({ ...editingPost, coverImage: e.target.value })}
-                        className="flex-1 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none"
-                      />
-                    </div>
-                    {/* Quick Presets */}
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <span className="text-[11px] text-neutral-500">Quick Tech Photos:</span>
-                      {PRESET_IMAGES.map((preset, idx) => (
+                  {/* Cover Image Picker & Uploader */}
+                  <div className="space-y-3 p-4 rounded-2xl bg-neutral-900/50 border border-neutral-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <label className="text-xs font-bold text-neutral-200 uppercase tracking-wider flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4 text-blue-400" />
+                          <span>Blog Cover Image</span>
+                        </label>
+                        <p className="text-[11px] text-neutral-400 mt-0.5">
+                          Upload directly from your device (PNG, JPG, WebP) or enter an external image link.
+                        </p>
+                      </div>
+
+                      {/* Tab Switcher: Upload from Device vs URL */}
+                      <div className="inline-flex items-center p-1 rounded-xl bg-neutral-950 border border-neutral-800 self-start sm:self-auto">
                         <button
-                          key={idx}
                           type="button"
-                          onClick={() => setEditingPost({ ...editingPost, coverImage: preset.url })}
-                          className="px-2 py-1 rounded bg-neutral-900 border border-neutral-800 text-[10px] text-neutral-300 hover:text-white hover:border-neutral-700"
+                          onClick={() => setCoverTab("upload")}
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                            coverTab === "upload"
+                              ? "bg-blue-600 text-white shadow-xs"
+                              : "text-neutral-400 hover:text-white"
+                          }`}
                         >
-                          {preset.label}
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Upload from Device</span>
                         </button>
-                      ))}
+                        <button
+                          type="button"
+                          onClick={() => setCoverTab("url")}
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                            coverTab === "url"
+                              ? "bg-neutral-800 text-white shadow-xs"
+                              : "text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          <LinkIcon className="w-3.5 h-3.5" />
+                          <span>Paste URL / Presets</span>
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Hidden File Input for Cover Image */}
+                    <input
+                      ref={coverFileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleCoverUpload(file);
+                        e.target.value = "";
+                      }}
+                    />
+
+                    {/* Mode 1: Device File Upload Area */}
+                    {coverTab === "upload" && (
+                      <div className="space-y-3">
+                        <div
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsDraggingCover(true);
+                          }}
+                          onDragLeave={() => setIsDraggingCover(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDraggingCover(false);
+                            const file = e.dataTransfer.files?.[0];
+                            if (file) handleCoverUpload(file);
+                          }}
+                          onClick={() => coverFileInputRef.current?.click()}
+                          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                            isDraggingCover
+                              ? "border-blue-500 bg-blue-500/10 scale-[1.01]"
+                              : "border-neutral-700/80 hover:border-neutral-500 bg-neutral-950/70 hover:bg-neutral-950"
+                          }`}
+                        >
+                          {isUploadingCover ? (
+                            <div className="py-4 space-y-2">
+                              <RefreshCw className="w-8 h-8 text-blue-400 animate-spin mx-auto" />
+                              <p className="text-xs font-semibold text-white">Uploading & optimizing image from device...</p>
+                              <p className="text-[11px] text-neutral-400">Processing high-resolution image</p>
+                            </div>
+                          ) : (
+                            <div className="py-2 space-y-2">
+                              <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mx-auto text-blue-400 shadow-inner">
+                                <UploadCloud className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-white">
+                                  <span className="text-blue-400 hover:underline">Click to browse image file</span> or drag & drop here
+                                </p>
+                                <p className="text-[11px] text-neutral-400 mt-1">
+                                  PNG, JPG, WebP, GIF, SVG (up to 10MB) • No external URL needed
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mode 2: URL or Presets */}
+                    {coverTab === "url" && (
+                      <div className="space-y-2.5">
+                        <div className="flex gap-2">
+                          <input
+                            type="url"
+                            placeholder="https://images.unsplash.com/... or any online image URL"
+                            value={editingPost.coverImage || ""}
+                            onChange={(e) => setEditingPost({ ...editingPost, coverImage: e.target.value })}
+                            className="flex-1 px-4 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="text-[11px] text-neutral-400 font-medium">Quick Presets:</span>
+                          {PRESET_IMAGES.map((preset, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setEditingPost({ ...editingPost, coverImage: preset.url })}
+                              className="px-2.5 py-1 rounded-lg bg-neutral-950 border border-neutral-800 text-[10px] text-neutral-300 hover:text-white hover:border-neutral-600 transition-colors"
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Active Cover Image Preview Bar */}
                     {editingPost.coverImage && (
-                      <div className="mt-2 h-28 rounded-xl overflow-hidden border border-neutral-800 max-w-sm">
-                        <img
-                          src={editingPost.coverImage}
-                          alt="Cover Preview"
-                          className="w-full h-full object-cover"
-                        />
+                      <div className="mt-2 p-3 rounded-xl bg-neutral-950 border border-neutral-800 flex flex-col sm:flex-row items-center gap-4">
+                        <div className="relative w-full sm:w-44 h-28 rounded-lg overflow-hidden border border-neutral-800 shrink-0 bg-neutral-900 group">
+                          <img
+                            src={editingPost.coverImage}
+                            alt="Cover Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1.5 w-full">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+                              Active Cover Preview
+                            </span>
+                            <span className="text-[11px] text-neutral-400 font-mono truncate max-w-xs block">
+                              {editingPost.coverImage.startsWith("data:")
+                                ? "Uploaded Image (Local File)"
+                                : editingPost.coverImage.startsWith("/uploads/")
+                                ? "Uploaded to Server"
+                                : "External URL"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400">
+                            This cover will appear on the blog list, featured hero banner, and social share cards.
+                          </p>
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => coverFileInputRef.current?.click()}
+                              className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-[11px] font-medium transition-colors flex items-center gap-1"
+                            >
+                              <Upload className="w-3 h-3" />
+                              <span>Replace Image</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingPost({ ...editingPost, coverImage: "" })}
+                              className="px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-300 text-[11px] font-medium border border-red-800/60 transition-colors flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -885,6 +1153,33 @@ export const AdminBlogManager: React.FC = () => {
                       </label>
                       {/* Editor Tool Toolbar */}
                       <div className="flex items-center gap-1 bg-neutral-900 px-2 py-1 rounded-lg border border-neutral-800">
+                        {/* Hidden input for content image */}
+                        <input
+                          ref={contentImgFileInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleContentImageUpload(file);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          type="button"
+                          disabled={isUploadingContentImg}
+                          onClick={() => contentImgFileInputRef.current?.click()}
+                          className="px-2 py-0.5 text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:bg-blue-950/40 rounded transition-colors"
+                          title="Upload and insert an image from your device directly into the article"
+                        >
+                          {isUploadingContentImg ? (
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <ImageIcon className="w-3 h-3" />
+                          )}
+                          <span>Insert Image</span>
+                        </button>
+                        <span className="text-neutral-700">|</span>
                         <button
                           type="button"
                           onClick={() => insertFormatting("## ")}
@@ -969,15 +1264,56 @@ export const AdminBlogManager: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-neutral-400">
-                        Author Avatar URL
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-neutral-400">
+                          Author Avatar
+                        </label>
+                        <button
+                          type="button"
+                          disabled={isUploadingAvatar}
+                          onClick={() => avatarFileInputRef.current?.click()}
+                          className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-1"
+                        >
+                          {isUploadingAvatar ? (
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Camera className="w-3 h-3" />
+                          )}
+                          <span>Upload Photo</span>
+                        </button>
+                      </div>
+                      {/* Hidden input for author avatar */}
                       <input
-                        type="url"
-                        value={editingPost.authorAvatar || ""}
-                        onChange={(e) => setEditingPost({ ...editingPost, authorAvatar: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:outline-none"
+                        ref={avatarFileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleAvatarUpload(file);
+                          e.target.value = "";
+                        }}
                       />
+                      <div className="flex items-center gap-2">
+                        {editingPost.authorAvatar ? (
+                          <img
+                            src={editingPost.authorAvatar}
+                            alt="Author Avatar"
+                            className="w-8 h-8 rounded-full object-cover border border-neutral-700 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-500 shrink-0 text-xs">
+                            ?
+                          </div>
+                        )}
+                        <input
+                          type="text"
+                          placeholder="Image URL or click Upload Photo"
+                          value={editingPost.authorAvatar || ""}
+                          onChange={(e) => setEditingPost({ ...editingPost, authorAvatar: e.target.value })}
+                          className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white text-xs focus:outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1214,18 +1550,67 @@ export const AdminBlogManager: React.FC = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-                        Open Graph Social Image (OG Image)
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+                          Open Graph Social Image (OG Image)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          {editingPost.coverImage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingPost({ ...editingPost, ogImage: editingPost.coverImage });
+                                showToast("Copied Cover Image to OG Social Image!", "success");
+                              }}
+                              className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
+                            >
+                              Use Cover
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            disabled={isUploadingOg}
+                            onClick={() => ogFileInputRef.current?.click()}
+                            className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1"
+                          >
+                            {isUploadingOg ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Upload className="w-3 h-3" />
+                            )}
+                            <span>Upload File</span>
+                          </button>
+                        </div>
+                      </div>
                       <input
-                        type="url"
-                        placeholder="Default uses cover image"
-                        value={editingPost.ogImage || ""}
-                        onChange={(e) => setEditingPost({ ...editingPost, ogImage: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none"
+                        ref={ogFileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleOgImageUpload(file);
+                          e.target.value = "";
+                        }}
                       />
+                      <div className="flex items-center gap-2">
+                        {editingPost.ogImage && (
+                          <img
+                            src={editingPost.ogImage}
+                            alt="OG Preview"
+                            className="w-8 h-8 rounded-lg object-cover border border-neutral-700 shrink-0"
+                          />
+                        )}
+                        <input
+                          type="text"
+                          placeholder="Image URL or click Upload File"
+                          value={editingPost.ogImage || ""}
+                          onChange={(e) => setEditingPost({ ...editingPost, ogImage: e.target.value })}
+                          className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none"
+                        />
+                      </div>
                       <span className="text-[10px] text-neutral-500">
-                        Shared preview image for LinkedIn, Twitter / X, and WhatsApp cards.
+                        Preview banner for LinkedIn, Twitter / X, and WhatsApp rich card shares.
                       </span>
                     </div>
                   </div>

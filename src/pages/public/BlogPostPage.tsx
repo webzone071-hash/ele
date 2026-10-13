@@ -308,6 +308,24 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug }) => {
         return;
       }
 
+      // Markdown Images: ![alt](url)
+      const imageMatch = line.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
+      if (imageMatch) {
+        const altText = imageMatch[1];
+        const imageUrl = imageMatch[2];
+        elements.push(
+          <figure key={`img-${index}`} className="my-8 rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-50 shadow-sm">
+            <img src={imageUrl} alt={altText} className="w-full h-auto object-cover max-h-[520px]" loading="lazy" />
+            {altText && (
+              <figcaption className="text-center text-xs text-neutral-500 py-2.5 px-4 bg-neutral-100/80 border-t border-neutral-200/60 font-mono">
+                {altText}
+              </figcaption>
+            )}
+          </figure>
+        );
+        return;
+      }
+
       // Empty lines
       if (!line.trim()) {
         return;
@@ -489,15 +507,17 @@ export const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug }) => {
       </header>
 
       {/* Featured Cover Image */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-        <div className="relative rounded-3xl overflow-hidden shadow-xl bg-neutral-900 border border-neutral-200 max-h-[520px]">
-          <img
-            src={post.coverImage}
-            alt={post.title}
-            className="w-full h-full object-cover"
-          />
+      {post.coverImage && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+          <div className="relative rounded-3xl overflow-hidden shadow-xl bg-neutral-900 border border-neutral-200 max-h-[520px]">
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Article Body */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
