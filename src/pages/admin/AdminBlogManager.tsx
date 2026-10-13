@@ -31,13 +31,21 @@ import {
   List,
   Heading,
   Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Table as TableIcon,
+  Columns,
   Quote,
   Upload,
   Image as ImageIcon,
   Camera,
   Link as LinkIcon,
   UploadCloud,
+  ClipboardList,
+  FileType,
 } from "lucide-react";
+import { handleGoogleDocsPaste, convertHtmlToMarkdown } from "../../utils/googleDocsConverter";
+import { BlogContentRenderer } from "../../components/common/BlogContentRenderer";
 
 const PRESET_IMAGES = [
   {
@@ -94,10 +102,21 @@ export const AdminBlogManager: React.FC = () => {
   const [isUploadingOg, setIsUploadingOg] = useState(false);
   const [isUploadingContentImg, setIsUploadingContentImg] = useState(false);
 
+  // Editor View Mode: write | preview | split
+  const [editorViewMode, setEditorViewMode] = useState<"write" | "preview" | "split">("write");
+
+  // Google Docs Paste Helper Modal State
+  const [showDocsPasteModal, setShowDocsPasteModal] = useState(false);
+  const [docsModalPastedHtml, setDocsModalPastedHtml] = useState("");
+  const [docsModalConvertedMd, setDocsModalConvertedMd] = useState("");
+  const [docsModalDetectedSource, setDocsModalDetectedSource] = useState("");
+
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const avatarFileInputRef = useRef<HTMLInputElement>(null);
   const ogFileInputRef = useRef<HTMLInputElement>(null);
   const contentImgFileInputRef = useRef<HTMLInputElement>(null);
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const docsModalEditableRef = useRef<HTMLDivElement>(null);
 
   // Upload Handlers
   const handleCoverUpload = async (file: File) => {
@@ -193,6 +212,122 @@ export const AdminBlogManager: React.FC = () => {
     } finally {
       setIsUploadingContentImg(false);
     }
+  };
+
+  // Google Docs / Rich Text Paste Handler for Article Content
+  const handleContentPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pasteResult = handleGoogleDocsPaste(e.clipboardData);
+    if (pasteResult.isRichContent) {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentVal = editingPost?.content || "";
+
+      // If current content is default template, replace cleanly
+      const isTemplate = currentVal.includes("## Overview\n\nEnter your technical analysis");
+      const newVal = isTemplate
+        ? pasteResult.content
+        : currentVal.substring(0, start) + pasteResult.content + currentVal.substring(end);
+
+      // Auto excerpt if excerpt is empty
+      let updatedExcerpt = editingPost?.excerpt || "";
+      if (!updatedExcerpt) {
+        const paragraphs = pasteResult.content.split("\n\n");
+        const cand = paragraphs.find(
+          (p) => !p.startsWith("#") && !p.startsWith("!") && !p.startsWith("|") && p.trim().length > 20
+        );
+        if (cand) {
+          updatedExcerpt = cand.replace(/[*_#`[\]()]/g, "").slice(0, 160).trim();
+        }
+      }
+
+      // Auto title if title is empty
+      let updatedTitle = editingPost?.title || "";
+      let updatedSlug = editingPost?.slug || "";
+      if (!updatedTitle) {
+        const titleMatch = pasteResult.content.match(/^#\s+(.+)$/m);
+        if (titleMatch && titleMatch[1]) {
+          updatedTitle = titleMatch[1].trim();
+          if (!updatedSlug) {
+            updatedSlug = updatedTitle
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-|-$/g, "");
+          }
+        }
+      }
+
+      setEditingPost((prev) => ({
+        ...prev,
+        content: newVal,
+        ...(updatedExcerpt && !prev?.excerpt ? { excerpt: updatedExcerpt } : {}),
+        ...(updatedTitle && !prev?.title ? { title: updatedTitle, slug: updatedSlug } : {}),
+      }));
+
+      const sourceName =
+        pasteResult.detectedSource === "google-docs"
+          ? "Google Docs"
+          : pasteResult.detectedSource === "word"
+          ? "MS Word"
+          : "Rich Text";
+
+      showToast(`✨ ${sourceName} styles preserved! (Headings, bold, lists & links converted cleanly)`, "success");
+    }
+  };
+
+  // Google Docs Paste Handler for Excerpt textarea
+  const handleExcerptPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pasteResult = handleGoogleDocsPaste(e.clipboardData);
+    if (pasteResult.isRichContent) {
+      e.preventDefault();
+      const cleanText = pasteResult.content
+        .replace(/^#+\s+/gm, "")
+        .replace(/[*_`~[\]()]/g, "")
+        .replace(/\n+/g, " ")
+        .slice(0, 160)
+        .trim();
+      setEditingPost((prev) => ({
+        ...prev,
+        excerpt: cleanText,
+      }));
+      showToast("✨ Cleaned summary from Google Docs preserved", "success");
+    }
+  };
+
+  // Dedicated button to trigger Google Docs paste
+  const handlePasteFromDocsClick = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const item of clipboardItems) {
+          if (item.types.includes("text/html")) {
+            const blob = await item.getType("text/html");
+            const html = await blob.text();
+            const md = convertHtmlToMarkdown(html);
+            if (md) {
+              setEditingPost((prev) => {
+                const cur = prev?.content || "";
+                const isTemplate = cur.includes("## Overview\n\nEnter your technical analysis");
+                return {
+                  ...prev,
+                  content: isTemplate ? md : `${cur}\n\n${md}`,
+                };
+              });
+              showToast("✨ Google Docs content pasted with full formatting preserved!", "success");
+              return;
+            }
+          }
+        }
+      }
+    } catch {
+      // Browser permissions didn't allow direct read
+    }
+    // Open dedicated paste helper modal
+    setDocsModalPastedHtml("");
+    setDocsModalConvertedMd("");
+    setDocsModalDetectedSource("");
+    setShowDocsPasteModal(true);
   };
 
   // Load all blogs including drafts
@@ -368,14 +503,31 @@ export const AdminBlogManager: React.FC = () => {
     }
   };
 
-  // Helper to append formatting in Markdown editor
+  // Helper to insert formatting at current cursor position in Markdown editor
   const insertFormatting = (prefix: string, suffix: string = "") => {
     if (!editingPost) return;
     const content = editingPost.content || "";
-    setEditingPost({
-      ...editingPost,
-      content: content + `\n${prefix}Sample Text${suffix}`,
-    });
+    const textarea = contentTextareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = content.substring(start, end) || "Sample Text";
+      const replacement = `${prefix}${selected}${suffix}`;
+      const newContent = content.substring(0, start) + replacement + content.substring(end);
+      setEditingPost({
+        ...editingPost,
+        content: newContent,
+      });
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+      }, 30);
+    } else {
+      setEditingPost({
+        ...editingPost,
+        content: content + `\n${prefix}Sample Text${suffix}`,
+      });
+    }
   };
 
   // SEO Score calculation & Audit
@@ -949,8 +1101,11 @@ export const AdminBlogManager: React.FC = () => {
                   {/* Excerpt / Summary */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-                        Article Excerpt / Teaser Summary *
+                      <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>Article Excerpt / Teaser Summary *</span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-950 text-blue-400 border border-blue-900">
+                          Google Docs paste supported
+                        </span>
                       </label>
                       <span className="text-[11px] text-neutral-500">
                         {(editingPost.excerpt || "").length} / 160 chars
@@ -959,9 +1114,10 @@ export const AdminBlogManager: React.FC = () => {
                     <textarea
                       rows={2}
                       required
-                      placeholder="Brief 1-2 sentence executive summary of this engineering topic for card previews and search results..."
+                      placeholder="Brief 1-2 sentence executive summary of this engineering topic for card previews and search results (paste from Google Docs to auto-clean)..."
                       value={editingPost.excerpt || ""}
                       onChange={(e) => setEditingPost({ ...editingPost, excerpt: e.target.value })}
+                      onPaste={handleExcerptPaste}
                       className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none focus:border-blue-500 leading-relaxed"
                     />
                   </div>
@@ -1145,98 +1301,286 @@ export const AdminBlogManager: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Rich Content Editor */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-                        Article Content (Markdown Supported)
-                      </label>
-                      {/* Editor Tool Toolbar */}
-                      <div className="flex items-center gap-1 bg-neutral-900 px-2 py-1 rounded-lg border border-neutral-800">
-                        {/* Hidden input for content image */}
-                        <input
-                          ref={contentImgFileInputRef}
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleContentImageUpload(file);
-                            e.target.value = "";
-                          }}
-                        />
+                  {/* Rich Content Editor with Google Docs Style Preservation */}
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-bold text-neutral-200 uppercase tracking-wider flex items-center gap-1.5">
+                          <span>Article Content / Body</span>
+                        </label>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/80 text-blue-400 border border-blue-800">
+                          <Sparkles className="w-2.5 h-2.5 text-blue-400" />
+                          <span>Google Docs Auto-Sync Active</span>
+                        </span>
+                      </div>
+
+                      {/* View Mode Switcher: Write / Live Preview / Split View */}
+                      <div className="flex items-center bg-neutral-900 p-0.5 rounded-xl border border-neutral-800 text-xs">
                         <button
                           type="button"
-                          disabled={isUploadingContentImg}
-                          onClick={() => contentImgFileInputRef.current?.click()}
-                          className="px-2 py-0.5 text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:bg-blue-950/40 rounded transition-colors"
-                          title="Upload and insert an image from your device directly into the article"
+                          onClick={() => setEditorViewMode("write")}
+                          className={`px-3 py-1 rounded-lg font-medium transition-colors ${
+                            editorViewMode === "write"
+                              ? "bg-neutral-800 text-white shadow-sm"
+                              : "text-neutral-400 hover:text-white"
+                          }`}
                         >
-                          {isUploadingContentImg ? (
-                            <RefreshCw className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <ImageIcon className="w-3 h-3" />
-                          )}
-                          <span>Insert Image</span>
-                        </button>
-                        <span className="text-neutral-700">|</span>
-                        <button
-                          type="button"
-                          onClick={() => insertFormatting("## ")}
-                          className="px-1.5 py-0.5 text-xs text-neutral-400 hover:text-white font-bold"
-                          title="Heading 2"
-                        >
-                          H2
+                          ✍️ Write
                         </button>
                         <button
                           type="button"
-                          onClick={() => insertFormatting("### ")}
-                          className="px-1.5 py-0.5 text-xs text-neutral-400 hover:text-white font-bold"
-                          title="Heading 3"
+                          onClick={() => setEditorViewMode("preview")}
+                          className={`px-3 py-1 rounded-lg font-medium transition-colors ${
+                            editorViewMode === "preview"
+                              ? "bg-neutral-800 text-white shadow-sm"
+                              : "text-neutral-400 hover:text-white"
+                          }`}
                         >
-                          H3
+                          👁️ Live Preview
                         </button>
                         <button
                           type="button"
-                          onClick={() => insertFormatting("**", "**")}
-                          className="px-1.5 py-0.5 text-xs text-neutral-400 hover:text-white font-bold"
-                          title="Bold Text"
+                          onClick={() => setEditorViewMode("split")}
+                          className={`hidden md:block px-3 py-1 rounded-lg font-medium transition-colors ${
+                            editorViewMode === "split"
+                              ? "bg-neutral-800 text-white shadow-sm"
+                              : "text-neutral-400 hover:text-white"
+                          }`}
                         >
-                          B
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => insertFormatting("- ")}
-                          className="px-1.5 py-0.5 text-xs text-neutral-400 hover:text-white"
-                          title="Bullet List"
-                        >
-                          • List
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => insertFormatting("```typescript\n// Code snippet\n```")}
-                          className="px-1.5 py-0.5 text-xs text-neutral-400 hover:text-white font-mono"
-                          title="Code Block"
-                        >
-                          {"</>"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => insertFormatting("> ")}
-                          className="px-1.5 py-0.5 text-xs text-neutral-400 hover:text-white"
-                          title="Quote"
-                        >
-                          Quote
+                          🌓 Split View
                         </button>
                       </div>
                     </div>
-                    <textarea
-                      rows={14}
-                      placeholder="Write your article body using headings (##), bold (**text**), lists (- item), or code blocks (```)..."
-                      value={editingPost.content || ""}
-                      onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
-                      className="w-full px-4 py-3 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-mono text-xs focus:outline-none focus:border-blue-500 leading-relaxed"
-                    />
+
+                    {/* Google Docs Helper Banner */}
+                    <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-900/60 flex items-start sm:items-center justify-between gap-3 text-xs text-blue-200/90">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-blue-600/30 flex items-center justify-center text-blue-400 shrink-0 font-bold text-xs">
+                          📄
+                        </div>
+                        <p className="leading-snug">
+                          <span className="font-semibold text-blue-300">Google Docs Style Preserver:</span> Copy any text, headings, bold, bullet points, links, or tables from Google Docs and simply press <kbd className="px-1.5 py-0.5 rounded bg-blue-950 border border-blue-800 text-blue-300 font-mono text-[10px]">Ctrl+V</kbd> (or Cmd+V) to keep exact formatting!
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handlePasteFromDocsClick}
+                        className="shrink-0 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[11px] shadow transition-colors flex items-center gap-1.5"
+                      >
+                        <ClipboardList className="w-3.5 h-3.5" />
+                        <span>Paste from Google Docs</span>
+                      </button>
+                    </div>
+
+                    {/* Formatting Toolbar */}
+                    <div className="flex flex-wrap items-center gap-1 bg-neutral-900/90 p-1.5 rounded-xl border border-neutral-800">
+                      {/* Hidden input for content image */}
+                      <input
+                        ref={contentImgFileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleContentImageUpload(file);
+                          e.target.value = "";
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        disabled={isUploadingContentImg}
+                        onClick={() => contentImgFileInputRef.current?.click()}
+                        className="px-2 py-1 text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 hover:bg-blue-950/60 rounded-lg transition-colors border border-blue-900/50"
+                        title="Upload image from device and embed into article"
+                      >
+                        {isUploadingContentImg ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <ImageIcon className="w-3.5 h-3.5" />
+                        )}
+                        <span>Upload Image</span>
+                      </button>
+
+                      <span className="text-neutral-700 mx-0.5">|</span>
+
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("# ")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white font-bold hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Main Heading (H1)"
+                      >
+                        H1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("## ")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white font-bold hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Sub Heading (H2)"
+                      >
+                        H2
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("### ")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white font-bold hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Section Heading (H3)"
+                      >
+                        H3
+                      </button>
+
+                      <span className="text-neutral-700 mx-0.5">|</span>
+
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("**", "**")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white font-bold hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Bold (Ctrl+B)"
+                      >
+                        <Bold className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("*", "*")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white italic hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Italic (Ctrl+I)"
+                      >
+                        <Italic className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("<u>", "</u>")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white underline hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Underline (<u>)"
+                      >
+                        <UnderlineIcon className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("[", "](https://)")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Insert Hyperlink"
+                      >
+                        <LinkIcon className="w-3.5 h-3.5" />
+                      </button>
+
+                      <span className="text-neutral-700 mx-0.5">|</span>
+
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("- ")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Bullet List"
+                      >
+                        • List
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("1. ")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Numbered List"
+                      >
+                        1. List
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertFormatting(
+                            "\n| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| Item A | Data B | Info C |\n"
+                          )
+                        }
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors flex items-center gap-1"
+                        title="Insert Markdown Table"
+                      >
+                        <TableIcon className="w-3.5 h-3.5" />
+                        <span>Table</span>
+                      </button>
+
+                      <span className="text-neutral-700 mx-0.5">|</span>
+
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("```typescript\n// Code snippet\n```")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white font-mono hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Code Block"
+                      >
+                        {"</>"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("> ")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Quote"
+                      >
+                        Quote
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting("\n---\n")}
+                        className="px-2 py-1 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+                        title="Divider Line"
+                      >
+                        ---
+                      </button>
+                    </div>
+
+                    {/* Editor / Preview Body */}
+                    {editorViewMode === "write" && (
+                      <textarea
+                        ref={contentTextareaRef}
+                        rows={16}
+                        placeholder="Write your article body or copy-paste directly from Google Docs / Word (Ctrl+V)... Headings, bold, lists, and tables will retain their exact styles automatically."
+                        value={editingPost.content || ""}
+                        onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
+                        onPaste={handleContentPaste}
+                        className="w-full px-4 py-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-mono text-xs focus:outline-none focus:border-blue-500 leading-relaxed shadow-inner"
+                      />
+                    )}
+
+                    {editorViewMode === "preview" && (
+                      <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800 min-h-[380px] max-h-[580px] overflow-y-auto space-y-4">
+                        <div className="pb-3 border-b border-neutral-800 flex items-center justify-between">
+                          <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                            Live Render Preview (Exact Blog Presentation)
+                          </span>
+                          <span className="text-[11px] text-neutral-500 font-mono">
+                            {(editingPost.content || "").length} characters
+                          </span>
+                        </div>
+                        <BlogContentRenderer content={editingPost.content || ""} theme="dark" />
+                      </div>
+                    )}
+
+                    {editorViewMode === "split" && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between px-1">
+                            <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                              Markdown Source (Paste Google Docs Here)
+                            </span>
+                          </div>
+                          <textarea
+                            ref={contentTextareaRef}
+                            rows={16}
+                            placeholder="Write or paste Google Docs text here..."
+                            value={editingPost.content || ""}
+                            onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
+                            onPaste={handleContentPaste}
+                            className="w-full h-[420px] px-4 py-3 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-mono text-xs focus:outline-none focus:border-blue-500 leading-relaxed shadow-inner"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between px-1">
+                            <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                              Formatted Result (Live)
+                            </span>
+                          </div>
+                          <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 h-[420px] overflow-y-auto">
+                            <BlogContentRenderer content={editingPost.content || ""} theme="dark" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Author Details & Tags */}
@@ -1743,6 +2087,156 @@ export const AdminBlogManager: React.FC = () => {
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Google Docs Paste Assistant Modal */}
+      {showDocsPasteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="p-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/60">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-lg">
+                  📄
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <span>Google Docs Style Preserver & Importer</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-950 text-blue-400 border border-blue-800">
+                      Auto-Formatter
+                    </span>
+                  </h3>
+                  <p className="text-xs text-neutral-400">
+                    Paste content from Google Docs, MS Word, or Notion to keep exact styling
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDocsPasteModal(false)}
+                className="p-1.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4 overflow-y-auto">
+              {/* Instructions */}
+              <div className="p-3.5 rounded-2xl bg-neutral-950 border border-neutral-800 text-xs text-neutral-300 space-y-2">
+                <div className="flex items-center gap-2 text-white font-semibold">
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>How it works:</span>
+                </div>
+                <ol className="list-decimal list-inside space-y-1 text-neutral-400 pl-1 text-[11px] leading-relaxed">
+                  <li>In Google Docs, select your article text and press <kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white font-mono text-[10px]">Ctrl+C</kbd> (or Cmd+C).</li>
+                  <li>Click into the box below and press <kbd className="px-1.5 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white font-mono text-[10px]">Ctrl+V</kbd> (or Cmd+V).</li>
+                  <li>All headings, bold/italic, bullet/numbered lists, links, and tables will retain their exact styles!</li>
+                </ol>
+              </div>
+
+              {/* Paste Target Area */}
+              <div
+                contentEditable
+                ref={docsModalEditableRef}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const res = handleGoogleDocsPaste(e.clipboardData);
+                  setDocsModalConvertedMd(res.content);
+                  setDocsModalDetectedSource(res.detectedSource);
+                  setDocsModalPastedHtml(e.clipboardData.getData("text/html") || "");
+                  showToast(
+                    `✨ Formatted ${res.detectedSource === "google-docs" ? "Google Docs" : "Rich"} text captured successfully!`,
+                    "success"
+                  );
+                }}
+                className="border-2 border-dashed border-blue-500/60 hover:border-blue-400 bg-blue-950/20 hover:bg-blue-950/30 rounded-2xl p-6 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all min-h-[140px] flex flex-col items-center justify-center cursor-text"
+              >
+                {!docsModalConvertedMd ? (
+                  <div className="space-y-1.5 pointer-events-none">
+                    <ClipboardList className="w-8 h-8 text-blue-400 mx-auto" />
+                    <p className="text-sm font-semibold text-white">
+                      Click here and press <span className="text-blue-400 font-mono">Ctrl+V</span> (or Cmd+V) to Paste
+                    </p>
+                    <p className="text-[11px] text-neutral-400">
+                      Headings, bold, italic, bullet lists, numbers, links & tables supported
+                    </p>
+                  </div>
+                ) : (
+                  <div className="w-full text-left space-y-2 pointer-events-auto">
+                    <div className="flex items-center justify-between pb-2 border-b border-blue-900/60">
+                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Styles preserved ({docsModalDetectedSource === "google-docs" ? "Google Docs" : "Rich Text"})</span>
+                      </span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        {docsModalConvertedMd.length} characters converted
+                      </span>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto p-3 rounded-xl bg-neutral-950 border border-neutral-800">
+                      <BlogContentRenderer content={docsModalConvertedMd} theme="dark" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="p-5 border-t border-neutral-800 bg-neutral-950/60 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDocsPasteModal(false);
+                  setDocsModalConvertedMd("");
+                }}
+                className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-neutral-300"
+              >
+                Cancel
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={!docsModalConvertedMd}
+                  onClick={() => {
+                    if (!docsModalConvertedMd) return;
+                    setEditingPost((prev) => {
+                      const cur = prev?.content || "";
+                      const isTemplate = cur.includes("## Overview\n\nEnter your technical analysis");
+                      return {
+                        ...prev,
+                        content: isTemplate ? docsModalConvertedMd : `${cur}\n\n${docsModalConvertedMd}`,
+                      };
+                    });
+                    setShowDocsPasteModal(false);
+                    setDocsModalConvertedMd("");
+                    showToast("✨ Appended to article with preserved styles!", "success");
+                  }}
+                  className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold disabled:opacity-50 transition-colors"
+                >
+                  Append to Content
+                </button>
+                <button
+                  type="button"
+                  disabled={!docsModalConvertedMd}
+                  onClick={() => {
+                    if (!docsModalConvertedMd) return;
+                    setEditingPost((prev) => ({
+                      ...prev,
+                      content: docsModalConvertedMd,
+                    }));
+                    setShowDocsPasteModal(false);
+                    setDocsModalConvertedMd("");
+                    showToast("✨ Entire article replaced with preserved Google Docs content!", "success");
+                  }}
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold disabled:opacity-50 transition-colors shadow-lg shadow-blue-900/40"
+                >
+                  Apply & Replace Content
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
