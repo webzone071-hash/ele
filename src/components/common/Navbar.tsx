@@ -48,16 +48,29 @@ export const Navbar: React.FC = () => {
     };
   }, [mobileMenuOpen]);
 
-  const navItems = data?.navigation && data.navigation.length > 0
+  const rawNavItems = data?.navigation && data.navigation.length > 0
     ? data.navigation
     : [
         { id: "1", name: "Home", url: "/", displayOrder: 1, isActive: true, openInNewTab: false },
         { id: "2", name: "About Us", url: "/about", displayOrder: 2, isActive: true, openInNewTab: false },
         { id: "3", name: "Services", url: "/services", displayOrder: 3, isActive: true, openInNewTab: false },
         { id: "4", name: "Portfolio", url: "/portfolio", displayOrder: 4, isActive: true, openInNewTab: false },
-        { id: "5", name: "Contact Us", url: "/contact", displayOrder: 5, isActive: true, openInNewTab: false },
-        { id: "6", name: "GET IN TOUCH", url: "/get-in-touch", displayOrder: 6, isActive: true, openInNewTab: false },
+        { id: "5", name: "Blog", url: "/blog", displayOrder: 5, isActive: true, openInNewTab: false },
+        { id: "6", name: "Contact Us", url: "/contact", displayOrder: 6, isActive: true, openInNewTab: false },
+        { id: "7", name: "GET IN TOUCH", url: "/get-in-touch", displayOrder: 7, isActive: true, openInNewTab: false },
       ];
+
+  const hasBlog = rawNavItems.some((item) => item.url === "/blog");
+  const navItems = hasBlog
+    ? rawNavItems
+    : (() => {
+        const copy = [...rawNavItems];
+        const blogItem = { id: "nav-blog", name: "Blog", url: "/blog", displayOrder: 5, isActive: true, openInNewTab: false };
+        const contactIdx = copy.findIndex((i) => i.url === "/contact");
+        if (contactIdx >= 0) copy.splice(contactIdx, 0, blogItem);
+        else copy.push(blogItem);
+        return copy;
+      })();
 
   const agencyName = settings?.agencyName || "Tech Elevant";
   const shortName = settings?.shortName || "Tech Elevant";
@@ -129,7 +142,7 @@ export const Navbar: React.FC = () => {
             <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
               {navItems.map((item) => {
                 const isGetInTouch = item.name.toUpperCase().includes("TOUCH") || item.url === "/get-in-touch";
-                const isActive = currentPath === item.url;
+                const isActive = currentPath === item.url || (item.url === "/blog" && currentPath.startsWith("/blog"));
 
                 if (isGetInTouch) {
                   return (
@@ -212,7 +225,7 @@ export const Navbar: React.FC = () => {
               <div className="space-y-1.5 pt-2">
                 {navItems.map((item) => {
                   const isGetInTouch = item.name.toUpperCase().includes("TOUCH") || item.url === "/get-in-touch";
-                  const isActive = currentPath === item.url;
+                  const isActive = currentPath === item.url || (item.url === "/blog" && currentPath.startsWith("/blog"));
 
                   if (isGetInTouch) {
                     return (

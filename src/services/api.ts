@@ -13,6 +13,7 @@ import {
   Lead,
   VisitorLog,
   VisitorAnalyticsSummary,
+  BlogPost,
 } from "../types";
 import { initialData } from "../data/initialData";
 
@@ -32,7 +33,29 @@ function getLocalSiteData(): BootstrapData {
     const raw = localStorage.getItem("techelevant_site_data");
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.settings) return parsed;
+      if (parsed && parsed.settings) {
+        // Ensure blogs array is populated
+        if (!parsed.blogs || !Array.isArray(parsed.blogs) || parsed.blogs.length === 0) {
+          parsed.blogs = initialData.blogs || [];
+        }
+        // Ensure /blog navigation item exists in navigation
+        if (parsed.navigation && Array.isArray(parsed.navigation)) {
+          const hasBlogNav = parsed.navigation.some((n: any) => n.url === "/blog");
+          if (!hasBlogNav) {
+            const blogNav = { id: "nav-blog", name: "Blog", url: "/blog", displayOrder: 5, isActive: true, openInNewTab: false };
+            const contactIdx = parsed.navigation.findIndex((n: any) => n.url === "/contact");
+            if (contactIdx >= 0) {
+              parsed.navigation.splice(contactIdx, 0, blogNav);
+            } else {
+              parsed.navigation.push(blogNav);
+            }
+            parsed.navigation.forEach((item: any, idx: number) => {
+              item.displayOrder = idx + 1;
+            });
+          }
+        }
+        return parsed;
+      }
     }
   } catch {}
   return initialData;
@@ -1003,6 +1026,110 @@ export const api = {
   },
   async updateProcessStep(id: string, step: Partial<ProcessStep>) {
     return this.saveProcessStep({ ...step, id });
+  },
+
+  // Blog & SEO Articles
+  async getBlogs(includeDrafts: boolean = false): Promise<BlogPost[]> {
+    const data = getLocalSiteData();
+    let blogs = data.blogs || [];
+    if (!includeDrafts) {
+      blogs = blogs.filter((b) => b.status === "published");
+    }
+    return [...blogs].sort((a, b) => {
+      const dateA = new Date(a.publishedAt || a.createdAt).getTime();
+      const dateB = new Date(b.publishedAt || b.createdAt).getTime();
+      return dateB - dateA;
+    });
+  },
+
+  async getBlogBySlug(slug: string): Promise<BlogPost | null> {
+    const data = getLocalSiteData();
+    const cleanSlug = (slug || "").trim().toLowerCase();
+    const blog = (data.blogs || []).find(
+      (b) => b.slug.toLowerCase() === cleanSlug || b.id === slug
+    );
+    return blog || null;
+  },
+
+  async saveBlog(blog: Partial<BlogPost>): Promise<{ success: boolean; blog: BlogPost }> {
+    await safeApiFetch(
+      blog.id && !blog.id.startsWith("new-") ? `${API_BASE}/admin/blogs/${blog.id}` : `${API_BASE}/admin/blogs`,
+      { method: blog.id && !blog.id.startsWith("new-") ? "PUT" : "POST", headers: getAuthHeaders(), body: JSON.stringify(blog) }
+    );
+
+    const now = new Date().toISOString();
+    const title = blog.title?.trim() || "Untitled Article";
+    const generatedSlug = (blog.slug || title)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+    const wordCount = ((blog.content || "") + " " + (blog.excerpt || "")).trim().split(/\s+/).filter(Boolean).length;
+    const calculatedMinutes = Math.max(1, Math.ceil(wordCount / 200));
+
+    const blogItem: BlogPost = {
+      id: blog.id && !blog.id.startsWith("new-") ? blog.id : "blog-" + Date.now(),
+      title,
+      slug: generatedSlug || "article-" + Date.now(),
+      excerpt: blog.excerpt?.trim() || "",
+      content: blog.content || "",
+      coverImage: blog.coverImage?.trim() || "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200",
+      category: blog.category?.trim() || "Enterprise Architecture",
+      authorName: blog.authorName?.trim() || "Tech Elevant Engineering",
+      authorRole: blog.authorRole?.trim() || "Principal Solutions Architect",
+      authorAvatar: blog.authorAvatar?.trim() || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+      readTimeMinutes: blog.readTimeMinutes || calculatedMinutes,
+      tags: Array.isArray(blog.tags) ? blog.tags : [],
+      status: blog.status || "published",
+      isFeatured: blog.isFeatured ?? false,
+      publishedAt: blog.publishedAt || (blog.status === "published" ? now : ""),
+      createdAt: blog.createdAt || now,
+      updatedAt: now,
+      // SEO Suite
+      seoTitle: blog.seoTitle?.trim() || `${title} | Tech Elevant`,
+      seoDescription: blog.seoDescription?.trim() || blog.excerpt?.trim() || "",
+      seoKeywords: blog.seoKeywords?.trim() || "",
+      canonicalUrl: blog.canonicalUrl?.trim() || `https://techelevant.com/blog/${generatedSlug}`,
+      ogImage: blog.ogImage?.trim() || blog.coverImage?.trim() || "",
+      robots: blog.robots || "index, follow",
+      structuredDataType: blog.structuredDataType || "TechArticle",
+    };
+
+    updateLocalSiteData((d) => {
+      if (!d.blogs) d.blogs = [];
+      const idx = d.blogs.findIndex((b) => b.id === blogItem.id);
+      if (idx >= 0) {
+        d.blogs[idx] = blogItem;
+      } else {
+        d.blogs.unshift(blogItem);
+      }
+    });
+
+    return { success: true, blog: blogItem };
+  },
+
+  async deleteBlog(id: string): Promise<{ success: boolean }> {
+    await safeApiFetch(`${API_BASE}/admin/blogs/${id}`, { method: "DELETE", headers: getAuthHeaders() });
+    updateLocalSiteData((d) => {
+      d.blogs = (d.blogs || []).filter((b) => b.id !== id);
+    });
+    return { success: true };
+  },
+
+  async toggleBlogStatus(id: string, status: "published" | "draft"): Promise<{ success: boolean; blog?: BlogPost }> {
+    let updatedBlog: BlogPost | undefined;
+    updateLocalSiteData((d) => {
+      const item = (d.blogs || []).find((b) => b.id === id);
+      if (item) {
+        item.status = status;
+        if (status === "published" && !item.publishedAt) {
+          item.publishedAt = new Date().toISOString();
+        }
+        item.updatedAt = new Date().toISOString();
+        updatedBlog = item;
+      }
+    });
+    return { success: true, blog: updatedBlog };
   },
 
   // Leads

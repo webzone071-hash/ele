@@ -13,6 +13,8 @@ import { PortfolioPage } from "./pages/public/PortfolioPage";
 import { MarketplacePage } from "./pages/public/MarketplacePage";
 import { ContactPage } from "./pages/public/ContactPage";
 import { GetInTouchPage } from "./pages/public/GetInTouchPage";
+import { BlogPage } from "./pages/public/BlogPage";
+import { BlogPostPage } from "./pages/public/BlogPostPage";
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 
@@ -37,6 +39,10 @@ const MainContent: React.FC = () => {
         document.title = `Contact Engineering | ${settings.agencyName}`;
       } else if (currentPath === "/get-in-touch") {
         document.title = `Schedule Scoping Consultation | ${settings.agencyName}`;
+      } else if (currentPath === "/blog") {
+        document.title = `Engineering Blog & Technical Insights | ${settings.agencyName}`;
+      } else if (currentPath.startsWith("/blog/")) {
+        // Individual blog post titles are handled inside BlogPostPage component
       } else {
         document.title = settings.metaTitle || `${settings.agencyName} | High-Performance Software Development`;
       }
@@ -81,6 +87,22 @@ const MainContent: React.FC = () => {
   // Public Routes
   const renderPublicPage = () => {
     const basePath = currentPath.split("?")[0];
+    
+    // Blog routing (supports /blog, /blog?slug=xyz, and /blog/slug-name)
+    if (basePath === "/blog" || basePath === "/blog/") {
+      const urlParams = new URLSearchParams(currentPath.split("?")[1] || "");
+      const querySlug = urlParams.get("slug");
+      if (querySlug) {
+        return <BlogPostPage slug={querySlug} />;
+      }
+      return <BlogPage />;
+    }
+
+    if (basePath.startsWith("/blog/")) {
+      const slug = basePath.replace(/^\/blog\//, "").replace(/\/$/, "");
+      return <BlogPostPage slug={slug} />;
+    }
+
     switch (basePath) {
       case "/":
       case "/home":

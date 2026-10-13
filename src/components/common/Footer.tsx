@@ -174,6 +174,11 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
+                <button onClick={() => navigate("/blog")} className="hover:text-white transition-colors flex items-center gap-1.5 text-neutral-300 hover:text-white">
+                  <span>Engineering Blog</span>
+                </button>
+              </li>
+              <li>
                 <button onClick={() => navigate("/marketplace-services")} className="hover:text-white transition-colors flex items-center gap-1.5 text-blue-400 hover:text-blue-300">
                   <span>Fiverr Services Hub</span>
                 </button>

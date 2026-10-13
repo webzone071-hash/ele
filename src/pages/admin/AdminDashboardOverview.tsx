@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Sparkles,
   Globe,
+  BookOpen,
 } from "lucide-react";
 import { api } from "../../services/api";
 
@@ -94,7 +95,7 @@ export const AdminDashboardOverview: React.FC<OverviewProps> = ({ setActiveTab }
       </div>
 
       {/* KPI Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
         <div
           onClick={() => setActiveTab("visitors")}
           className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-emerald-500/50 cursor-pointer transition-all shadow-md group col-span-2 sm:col-span-1"
@@ -195,6 +196,29 @@ export const AdminDashboardOverview: React.FC<OverviewProps> = ({ setActiveTab }
           <span className="text-3xl font-black text-white">{fiverrServices.length}</span>
           <span className="text-[11px] text-neutral-500 block mt-1">
             Ready-to-order packages
+          </span>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("blog")}
+          className="p-5 rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-blue-500/50 cursor-pointer transition-all shadow-md group col-span-2 sm:col-span-1"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+              Blog & SEO
+            </span>
+            <div className="p-2 rounded-lg bg-neutral-900 text-blue-400 group-hover:bg-blue-400 group-hover:text-neutral-950 transition-colors">
+              <BookOpen className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-white">{data?.blogs?.length || 3}</span>
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+              SEO Ready
+            </span>
+          </div>
+          <span className="text-[11px] text-neutral-500 block mt-1">
+            Published technical briefs
           </span>
         </div>
       </div>

@@ -291,6 +291,34 @@ export interface DdosSecurityStatus {
   };
 }
 
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImage: string;
+  category: string;
+  authorName: string;
+  authorRole: string;
+  authorAvatar: string;
+  readTimeMinutes: number;
+  tags: string[];
+  status: "published" | "draft" | "archived";
+  isFeatured: boolean;
+  publishedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  // Comprehensive SEO suite
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  robots?: string;
+  structuredDataType?: "Article" | "TechArticle" | "BlogPosting";
+}
+
 export interface BootstrapData {
   settings: SiteSettings;
   hero: HeroData;
@@ -305,4 +333,6 @@ export interface BootstrapData {
   faqs: FAQ[];
   process: ProcessStep[];
   leads?: Lead[];
+  blogs?: BlogPost[];
 }
+

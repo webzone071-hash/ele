@@ -12,6 +12,7 @@ import { AdminTestimonialsManager } from "./AdminTestimonialsManager";
 import { AdminSettingsManager } from "./AdminSettingsManager";
 import { AdminVisitorsManager } from "./AdminVisitorsManager";
 import { AdminDdosManager } from "./AdminDdosManager";
+import { AdminBlogManager } from "./AdminBlogManager";
 
 export const AdminDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -20,6 +21,8 @@ export const AdminDashboardPage: React.FC = () => {
     switch (activeTab) {
       case "overview":
         return <AdminDashboardOverview setActiveTab={setActiveTab} />;
+      case "blog":
+        return <AdminBlogManager />;
       case "visitors":
         return <AdminVisitorsManager />;
       case "security":

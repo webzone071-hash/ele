@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Globe,
   RefreshCw,
+  BookOpen,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -58,6 +59,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: "sections", label: "Hide/Show Sections", icon: Layers, badge: "Visibility" },
     { id: "services", label: "Services CMS", icon: Briefcase },
     { id: "portfolio", label: "Portfolio CMS", icon: FolderKanban },
+    {
+      id: "blog",
+      label: "Blog & SEO CMS",
+      icon: BookOpen,
+      badge: "SEO",
+    },
     {
       id: "fiverr",
       label: "Fiverr Gigs CMS",
